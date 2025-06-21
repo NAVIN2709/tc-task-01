@@ -1,0 +1,25 @@
+{
+  "name": "LostAF",
+  "short_name": "LostAF",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffbea",
+  "theme_color": "#facc15",
+  "orientation": "portrait",
+  "description": "Snap-style lost & found app where users drop pins, post items, and chat anonymously.",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "lang": "en-IN",
+  "scope": "/",
+  "categories": ["utilities", "social", "productivity"]
+}
