@@ -19,7 +19,6 @@ const Login = () => {
     setLoading(true);
     try {
       await googleSignIn();
-      console.log("Signed in with Google");
       navigate("/onboarding");
     } catch (error) {
       console.error("Google sign-in error:", error);

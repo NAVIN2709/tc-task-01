@@ -1,13 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from './components/Footer';
+import { db, auth } from '../firebase';
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  getDoc
+} from 'firebase/firestore';
 
 const Chats = () => {
-  const [chats] = useState([
-    { id: 'sunny_boi', lastMessage: 'Found your ID!', time: '2h ago' },
-    { id: 'trichy_girl23', lastMessage: 'Did you lose a watch?', time: '5h ago' },
-    { id: 'snap_anon', lastMessage: 'Let’s meet at admin block.', time: '1d ago' },
-  ]);
+  const [chats, setChats] = useState([]);
+  const currentUser = auth.currentUser;
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const fetchChats = async () => {
+      try {
+        const chatsRef = collection(db, 'chats');
+        const q = query(chatsRef, where('users', 'array-contains', currentUser.uid));
+        const snapshot = await getDocs(q);
+
+        const chatData = await Promise.all(
+          snapshot.docs.map(async (docSnap) => {
+            const chatId = docSnap.id;
+            const data = docSnap.data();
+
+            const otherUserId = data.users.find((uid) => uid !== currentUser.uid);
+            const otherUserRef = doc(db, 'users', otherUserId);
+            const otherUserSnap = await getDoc(otherUserRef);
+
+            const otherUsername = otherUserSnap.exists()
+              ? otherUserSnap.data().username || otherUserId
+              : otherUserId;
+
+            return {
+              id: chatId,
+              username: otherUsername,
+            };
+          })
+        );
+
+        setChats(chatData);
+      } catch (error) {
+        console.error('Error fetching chats:', error);
+      }
+    };
+
+    fetchChats();
+  }, [currentUser]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -21,13 +65,15 @@ const Chats = () => {
           >
             <div className="flex justify-between">
               <div>
-                <div className="font-semibold text-gray-800">@{chat.id}</div>
-                <div className="text-sm text-gray-500 truncate">{chat.lastMessage}</div>
+                <div className="font-semibold text-gray-800">@{chat.username}</div>
+                <div className="text-sm text-gray-500 truncate">Tap to view chat</div>
               </div>
-              <span className="text-xs text-gray-400">{chat.time}</span>
             </div>
           </Link>
         ))}
+        {chats.length === 0 && (
+          <div className="text-center text-sm text-gray-500 mt-20">No chats yet 👻</div>
+        )}
       </div>
       <Footer />
     </div>

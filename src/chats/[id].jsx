@@ -1,40 +1,87 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { db, auth } from "../firebase";
+import {
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 
 const ChatDetail = () => {
-  const { id } = useParams(); // Username from URL
-  const [messages, setMessages] = useState([
-    { sender: "me", text: "Hey! I lost something.", time: "10:00 AM" },
-    { sender: id, text: "Oh, what was it?", time: "10:01 AM" },
-    { sender: "me", text: "A yellow bag near admin block.", time: "10:02 AM" },
-  ]);
+  const { id } = useParams();
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [otherUser, setOtherUser] = useState(null);
   const messagesEndRef = useRef(null);
+  const currentUid = auth.currentUser?.uid;
+
+  // 🔄 Fetch messages
+  useEffect(() => {
+    const q = query(
+      collection(db, "chats", id, "messages"),
+      orderBy("createdAt", "asc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const msgs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setMessages(msgs);
+    });
+
+    return () => unsubscribe();
+  }, [id]);
+
+  // ⬇ Scroll to bottom on message update
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // 👤 Fetch other user's profile
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    const fetchOtherUser = async () => {
+      try {
+        const userIds = id.split("_");
+        const otherUserId = userIds.find((uid) => uid !== currentUid);
+        const userRef = doc(db, "users", otherUserId);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          setOtherUser(userSnap.data());
+        }
+      } catch (err) {
+        console.error("Error fetching user:", err);
+      }
+    };
 
-  const sendMessage = (e) => {
+    fetchOtherUser();
+  }, [id]);
+
+  // 🚀 Send message
+  const sendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
 
-    const newMsg = {
-      sender: "me",
-      text: input.trim(),
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-
-    setMessages((prev) => [...prev, newMsg]);
-    setInput("");
+    try {
+      await addDoc(collection(db, "chats", id, "messages"), {
+        text: input.trim(),
+        sender: currentUid,
+        createdAt: serverTimestamp(),
+      });
+      setInput("");
+    } catch (err) {
+      console.error("Send message error:", err);
+    }
   };
 
   return (
@@ -44,33 +91,51 @@ const ChatDetail = () => {
         <Link to="/chats" className="flex items-center gap-1 text-yellow-500">
           <ArrowLeft size={20} />
         </Link>
-        <span className="text-md font-bold">@{id}</span>
+
+        <div className="flex items-center gap-2">
+          {otherUser?.profile_pic && (
+            <img
+              src={otherUser.profile_pic}
+              alt="Profile"
+              className="w-7 h-7 rounded-full object-cover"
+            />
+          )}
+          <span className="text-md font-bold">
+            @{otherUser?.username || "Loading..."}
+          </span>
+        </div>
+
         <div className="w-6" />
       </div>
 
       {/* Messages */}
       <div className="flex-1 px-4 py-3 space-y-3 overflow-y-auto">
-        {messages.map((msg, i) => (
+        {messages.map((msg) => (
           <div
-            key={i}
+            key={msg.id}
             className={`max-w-[75%] px-3 py-2 rounded-xl ${
-              msg.sender === "me"
+              msg.sender === currentUid
                 ? "ml-auto bg-yellow-100"
                 : "mr-auto bg-gray-100"
             }`}
           >
             <p
               className={`text-xs font-semibold mb-1 ${
-                msg.sender === "me"
+                msg.sender === currentUid
                   ? "text-red-500 text-right"
                   : "text-blue-500 text-left"
               }`}
             >
-              {msg.sender === "me" ? "You" : msg.sender}
+              {msg.sender === currentUid ? "You" : "Them"}
             </p>
             <p className="text-sm text-black break-words">{msg.text}</p>
             <span className="text-xs text-gray-500 block mt-1 text-right">
-              {msg.time}
+              {msg.createdAt?.toDate
+                ? msg.createdAt.toDate().toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : ""}
             </span>
           </div>
         ))}

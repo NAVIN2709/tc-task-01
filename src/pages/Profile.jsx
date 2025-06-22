@@ -7,6 +7,11 @@ import {
   getDoc,
   updateDoc,
   serverTimestamp,
+  collection,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
@@ -16,10 +21,12 @@ const Profile = () => {
   const [editing, setEditing] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [userItems, setUserItems] = useState([]);
 
+  const navigate = useNavigate();
   const user = auth.currentUser;
 
+  // Fetch user profile
   useEffect(() => {
     const fetchUserData = async () => {
       if (!user) return;
@@ -40,6 +47,31 @@ const Profile = () => {
     fetchUserData();
   }, [user]);
 
+  // Fetch user's submitted items
+  useEffect(() => {
+    const fetchUserItems = async () => {
+      if (!user) return;
+
+      try {
+        const q = query(
+          collection(db, "items"),
+          where("submitted_by", "==", user.uid)
+        );
+        const snapshot = await getDocs(q);
+        const items = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setUserItems(items);
+      } catch (err) {
+        console.error("Error fetching user items:", err);
+      }
+    };
+
+    fetchUserItems();
+  }, [user]);
+
+  // Save updated username
   const handleSave = async () => {
     if (!inputValue.trim()) return;
 
@@ -56,6 +88,7 @@ const Profile = () => {
     }
   };
 
+  // Sign out
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -65,16 +98,15 @@ const Profile = () => {
     }
   };
 
-  // Placeholder user items (replace with Firestore later if needed)
-  const userItems = [
-    { id: 1, title: "Lost Bag", type: "lost" },
-    { id: 2, title: "Found ID Card", type: "found" },
-    { id: 3, title: "Lost Watch", type: "lost" },
-    { id: 4, title: "Found Phone", type: "found" },
-  ];
-
-  const lostCount = userItems.filter((item) => item.type === "lost").length;
-  const foundCount = userItems.filter((item) => item.type === "found").length;
+  // Mark an item as done (delete it)
+  const handleDeleteItem = async (itemId) => {
+    try {
+      await deleteDoc(doc(db, "items", itemId));
+      setUserItems((prev) => prev.filter((item) => item.id !== itemId));
+    } catch (err) {
+      console.error("Error deleting item:", err);
+    }
+  };
 
   if (loading) {
     return (
@@ -127,23 +159,48 @@ const Profile = () => {
         )}
       </div>
 
-      {/* Stats Section */}
-      <div className="mt-8 border border-yellow-200 bg-white rounded-xl shadow p-4 w-full max-w-sm text-center">
-        <h3 className="text-lg font-semibold text-gray-700 mb-3">
-          📦 Your Contributions
+      {/* User Items Section */}
+      <div className="mt-8 w-full max-w-sm">
+        <h3 className="text-lg font-semibold text-gray-700 mb-3 text-center">
+          📦 Your Items
         </h3>
-        <div className="flex justify-around text-yellow-600 font-bold text-lg">
-          <div>
-            <p className="text-sm text-gray-500">Lost Items</p>
-            {lostCount}
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Found Items</p>
-            {foundCount}
-          </div>
-        </div>
+
+        {userItems.length === 0 ? (
+          <p className="text-center text-gray-500">No items submitted yet.</p>
+        ) : (
+          <ul className="space-y-4">
+            {userItems.map((item) => (
+              <li
+                key={item.id}
+                className="border border-yellow-200 rounded-lg bg-white shadow-sm p-3"
+              >
+                <div className="flex gap-3">
+                  {item.image && (
+                    <img
+                      src={item.image}
+                      alt="item"
+                      className="w-16 h-16 object-cover rounded-lg border"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <p className="font-semibold text-yellow-700">{item.title}</p>
+                    <p className="text-sm text-gray-600">{item.description}</p>
+                  </div>
+                </div>
+
+                <button
+                  className="mt-3 bg-green-500 hover:bg-green-600 text-white text-xs px-4 py-1 rounded-full font-medium transition duration-200"
+                  onClick={() => handleDeleteItem(item.id)}
+                >
+                  ✅ Mark as Done
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
+      {/* Public Note */}
       <div className="mt-10 text-sm text-gray-500">
         👻 Your public profile on SnapMap
       </div>

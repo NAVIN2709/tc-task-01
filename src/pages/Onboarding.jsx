@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { db, auth } from "../firebase";
-import { doc, setDoc,serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 const profilePics = [
@@ -17,6 +17,23 @@ const Onboarding = () => {
   const [username, setUsername] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  useEffect(()=>{
+    const user = auth.currentUser;
+    if (!user) {
+      alert("Not signed in!");
+      return;
+    }
+    const userDocRef = doc(db, "users", user.uid);
+    getDoc(userDocRef).then((doc) => {
+      if (doc.exists()) {
+        const userData = doc.data();
+        if (userData.onboarding_completed) {
+          navigate("/");
+        }
+      }
+    });
+  },[auth.currentUser.uid])
+
   const handleNext = () => {
     setSelectedIndex((prev) => (prev + 1) % profilePics.length);
   };
@@ -28,26 +45,35 @@ const Onboarding = () => {
   };
 
   const handleSubmit = async () => {
-    if (!username.trim()) return;
-
     const user = auth.currentUser;
+
     if (!user) {
       alert("Not signed in!");
       return;
     }
 
-    const userData = {
-      username: username.trim(),
-      profile_pic: profilePics[selectedIndex],
-      created: serverTimestamp(),
-    };
+    if (!username.trim()) {
+      alert("Username cannot be empty.");
+      return;
+    }
 
     try {
-      await setDoc(doc(db, "users", user.uid), userData);
+      // 💾 Save onboarding data
+      const userDocRef = doc(db, "users", user.uid);
+      
+      const userData = {
+        username: username.trim(),
+        profile_pic: profilePics[selectedIndex],
+        created: serverTimestamp(),
+        onboarding_completed: true,
+      };
+
+      await setDoc(userDocRef, userData, { merge: true });
       console.log("User profile saved!");
-      navigate("/")
+      navigate("/");
     } catch (error) {
-      console.error("Error saving profile:", error);
+      console.error("Error during onboarding:", error);
+      alert("Something went wrong. Please try again.");
     }
   };
 

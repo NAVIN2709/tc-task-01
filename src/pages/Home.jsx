@@ -15,7 +15,16 @@ import { useNavigate } from "react-router-dom";
 import Footer from "./components/Footer";
 import { db } from "../firebase";
 import { auth } from "../firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  serverTimestamp,
+  doc,
+  getDoc,
+  setDoc
+} from "firebase/firestore";
 
 // Fix default marker icon
 const defaultIcon = L.icon({
@@ -52,18 +61,33 @@ const Home = () => {
   }, []);
 
   // Optional: Tap to navigate to /newplace with location
-  const AddMarkerOnClick = () => {
-    useMapEvents({
-      click(e) {
-        const { lat, lng } = e.latlng;
-        navigate("/newplace", { state: { lat, lng } });
-      },
-    });
-    return null;
-  };
+
 
   const handleOpenCamera = () => {
     navigate("/newplace");
+  };
+
+  const handleReport = async (otherUserId) => {
+    const currentUserId = auth.currentUser?.uid;
+    if (!currentUserId) return;
+
+    const combinedId = `${currentUserId}_${otherUserId}`
+
+    try {
+      const chatRef = doc(db, "chats", combinedId);
+      const chatSnap = await getDoc(chatRef);
+
+      if (!chatSnap.exists()) {
+        await setDoc(chatRef, {
+          users: [currentUserId, otherUserId],
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      navigate(`/chats/${combinedId}`);
+    } catch (error) {
+      console.error("Error creating chat:", error);
+    }
   };
 
   return (
@@ -79,8 +103,6 @@ const Home = () => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution="&copy; OpenStreetMap contributors"
         />
-
-        <AddMarkerOnClick />
 
         {locations.map((loc) => (
           <Marker key={loc.id} position={loc.coordinates}>
@@ -103,7 +125,7 @@ const Home = () => {
               {/* Only show report if user is not the owner */}
               {auth.currentUser?.uid !== loc.submitted_by && (
                 <button
-                  onClick={() => navigate(`/chats/${loc.submitted_by}`)}
+                  onClick={() => handleReport(loc.submitted_by)}
                   className="mt-1 bg-red-500 hover:bg-red-600 text-white text-xs px-4 py-1 rounded-full font-medium transition duration-200"
                 >
                   🚨 Report
@@ -115,7 +137,7 @@ const Home = () => {
       </MapContainer>
 
       {/* Info Note */}
-      <div className="absolute top-4 left-4 bg-white px-4 py-2 rounded-full shadow-md text-sm font-semibold z-[1000]">
+      <div className="absolute top-4 left-12 bg-white px-4 py-2 rounded-full shadow-md text-sm font-semibold z-[1000]">
         🗺️ Tap the camera or map to report an item
       </div>
 
