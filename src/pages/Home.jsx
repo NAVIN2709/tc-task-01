@@ -13,6 +13,9 @@ import markerShadowUrl from "leaflet/dist/images/marker-shadow.png";
 import { Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Footer from "./components/Footer";
+import { db } from "../firebase";
+import { auth } from "../firebase";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 
 // Fix default marker icon
 const defaultIcon = L.icon({
@@ -27,27 +30,28 @@ const Home = () => {
   const mapRef = useRef();
   const navigate = useNavigate();
 
-  const [locations, setLocations] = useState([
-    {
-      id: 1,
-      title: "Lost Bag",
-      description: "Black backpack near hostel.",
-      coordinates: [10.7602, 78.8142],
-      image: null,
-    },
-  ]);
+  const [locations, setLocations] = useState([]);
 
-  // Load marker from localStorage if present
+  // 🔥 Load from Firestore
   useEffect(() => {
-    const stored = localStorage.getItem("newMarker");
-    if (stored) {
-      const marker = JSON.parse(stored);
-      setLocations((prev) => [...prev, marker]);
-      localStorage.removeItem("newMarker");
-    }
+    const fetchItems = async () => {
+      try {
+        const q = query(collection(db, "items"), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        const markers = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setLocations(markers);
+      } catch (error) {
+        console.error("Error fetching items:", error);
+      }
+    };
+
+    fetchItems();
   }, []);
 
-  // Handle map click to go to Newplace with location
+  // Optional: Tap to navigate to /newplace with location
   const AddMarkerOnClick = () => {
     useMapEvents({
       click(e) {
@@ -58,11 +62,9 @@ const Home = () => {
     return null;
   };
 
-  // When camera is clicked
   const handleOpenCamera = () => {
-  navigate('/newplace');
-};
-
+    navigate("/newplace");
+  };
 
   return (
     <div className="h-screen w-full relative">
@@ -83,15 +85,29 @@ const Home = () => {
         {locations.map((loc) => (
           <Marker key={loc.id} position={loc.coordinates}>
             <Popup>
-              <strong>{loc.title}</strong>
-              <br />
-              {loc.description}
+              <div className="text-sm font-semibold text-black mb-1">
+                {loc.title}
+              </div>
+              <div className="text-xs text-gray-700 mb-2">
+                {loc.description}
+              </div>
+
               {loc.image && (
                 <img
                   src={loc.image}
                   alt="Lost Item"
-                  className="mt-2 rounded w-32"
+                  className="w-full max-w-[120px] rounded mb-2"
                 />
+              )}
+
+              {/* Only show report if user is not the owner */}
+              {auth.currentUser?.uid !== loc.submitted_by && (
+                <button
+                  onClick={() => navigate(`/chats/${loc.submitted_by}`)}
+                  className="mt-1 bg-red-500 hover:bg-red-600 text-white text-xs px-4 py-1 rounded-full font-medium transition duration-200"
+                >
+                  🚨 Report
+                </button>
               )}
             </Popup>
           </Marker>
@@ -103,7 +119,7 @@ const Home = () => {
         🗺️ Tap the camera or map to report an item
       </div>
 
-      {/* Camera FAB */}
+      {/* Floating Camera Button */}
       <div
         onClick={handleOpenCamera}
         className="bg-yellow-400 rounded-full p-3 shadow-xl absolute bottom-20 left-1/2 transform -translate-x-1/2 z-[6000] cursor-pointer"

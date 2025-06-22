@@ -3,6 +3,8 @@ import CameraPhoto from 'react-html5-camera-photo';
 import 'react-html5-camera-photo/build/css/index.css';
 import { useNavigate } from 'react-router-dom';
 import { Repeat } from 'lucide-react';
+import { auth, db } from '../../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const Newplace = () => {
   const [image, setImage] = useState('');
@@ -30,20 +32,29 @@ const Newplace = () => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title || !form.description || !image || !location) return;
 
-    const newMarker = {
-      id: Date.now(),
-      title: form.title,
-      description: form.description,
-      coordinates: [location.lat, location.lng],
-      image,
-    };
+    try {
+      const currentUser = auth.currentUser;
 
-    localStorage.setItem('newMarker', JSON.stringify(newMarker));
-    navigate('/');
+      const newItem = {
+        title: form.title,
+        description: form.description,
+        image, // base64 string
+        coordinates: [location.lat, location.lng],
+        submitted_by: currentUser.uid,
+        createdAt: serverTimestamp(),
+      };
+
+      await addDoc(collection(db, "items"), newItem);
+
+      console.log("Item added:", newItem);
+      navigate('/');
+    } catch (error) {
+      console.error("Failed to submit item:", error);
+    }
   };
 
   const toggleCamera = () => {
