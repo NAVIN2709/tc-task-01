@@ -1,6 +1,7 @@
 import React from 'react';
-import { MapPin, MessageSquare, User } from 'lucide-react';
+import { MapPin, MessageSquare, TagIcon, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { Tag } from 'lucide-react';
 
 const Footer = () => {
   const location = useLocation();
@@ -16,6 +17,14 @@ const Footer = () => {
           <MapPin size={24} />
         </div>
         <span className={`${isActive('/') ? 'text-yellow-500 font-semibold' : ''}`}>Map</span>
+      </Link>
+
+      {/* Tags */}
+      <Link to="/items" className="flex flex-col items-center text-xs">
+        <div className={`p-2 rounded-full ${isActive('/items') ? 'bg-yellow-400' : ''}`}>
+          <TagIcon size={24} />
+        </div>
+        <span className={`${isActive('/items') ? 'text-yellow-500 font-semibold' : ''}`}>Items</span>
       </Link>
 
       {/* Chat */}

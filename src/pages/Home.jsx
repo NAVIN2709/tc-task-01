@@ -71,7 +71,9 @@ const Home = () => {
     const currentUserId = auth.currentUser?.uid;
     if (!currentUserId) return;
 
-    const combinedId = `${currentUserId}_${otherUserId}`
+    const combinedId = currentUserId > otherUserId
+      ? `${currentUserId}_${otherUserId}`
+      : `${otherUserId}_${currentUserId}`;
 
     try {
       const chatRef = doc(db, "chats", combinedId);

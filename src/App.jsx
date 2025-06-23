@@ -8,6 +8,7 @@ import ChatDetail from "../src/chats/[id]";
 import Login from "./pages/Login";
 import PrivateRoute from "./pages/components/PrivateRoute";
 import Onboarding from "./pages/Onboarding";
+import Items from "./pages/Items";
 
 const App = () => {
   return (
@@ -23,6 +24,14 @@ const App = () => {
           element={
             <PrivateRoute>
               <Home />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/items"
+          element={
+            <PrivateRoute>
+              <Items />
             </PrivateRoute>
           }
         />
