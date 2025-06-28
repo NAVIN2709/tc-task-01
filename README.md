@@ -1,7 +1,9 @@
 🧭 lostAF
+
 lostAF is a Snapchat-style lost and found web application built using React.js and Firebase. It helps people quickly report found items and connect with those who lost them—fast, simple, and secure.
 
 🚀 Features
+
 👤 User Authentication
 Users can sign up, log in, and set a unique username and profile picture.
 
