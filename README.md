@@ -1,12 +1,22 @@
-# React + Vite
+🧭 lostAF
+lostAF is a Snapchat-style lost and found web application built using React.js and Firebase. It helps people quickly report found items and connect with those who lost them—fast, simple, and secure.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+🚀 Features
+👤 User Authentication
+Users can sign up, log in, and set a unique username and profile picture.
 
-Currently, two official plugins are available:
+📸 Snap-and-Post Interface
+Upload images of found items, add a brief description, and tag the current location.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+🗺️ Location Integration
+Each found item is automatically pinned to its location, helping owners track where it was discovered.
 
-## Expanding the ESLint configuration
+💬 Direct Messaging (DMs)
+Users who identify their lost item can directly message the person who posted it.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+🔧 Tech Stack
+Frontend: React.js
+
+Backend & Auth: Firebase Auth & Firestore
+
+Give a try : https://lostaf.onrender.com 
