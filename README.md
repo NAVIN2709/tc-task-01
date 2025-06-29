@@ -1,6 +1,6 @@
-🧭 lostAF
+🧭 LostAF
 
-lostAF is a Snapchat-style lost and found web application built using React.js and Firebase. It helps people quickly report found items and connect with those who lost them—fast, simple, and secure.
+LostAF is a Snapchat-style lost and found web application built using React.js and Firebase. It helps people quickly report found items and connect with those who lost them—fast, simple, and secure.
 
 🚀 Features
 
@@ -22,3 +22,6 @@ Frontend: React.js
 Backend & Auth: Firebase Auth & Firestore
 
 Give a try : https://lostaf.onrender.com 
+
+Here's the figma design: https://www.figma.com/design/j70yzcNi1aiRoPXdnq9uuL/Tc-01?node-id=0-1&t=uLHpVTXxmgiwk5bD-1
+
