@@ -115,6 +115,9 @@ const Home = () => {
               <div className="text-xs text-gray-700 mb-2">
                 {loc.description}
               </div>
+              <div className="text-xs text-gray-700 mb-2">
+                Submitted To: {loc.submitted_to}
+              </div>
 
               {loc.image && (
                 <img
@@ -141,6 +144,9 @@ const Home = () => {
       {/* Info Note */}
       <div className="absolute top-4 left-12 bg-white px-4 py-2 rounded-full shadow-md text-sm font-semibold z-[1000]">
         🗺️ Tap the camera icon to report an item
+      </div>
+      <div className="absolute top-14 left-12 bg-white px-4 py-2 rounded-full shadow-md text-sm font-semibold z-[1000]">
+        Once handovered please mark done ✅ in profile
       </div>
 
       {/* Floating Camera Button */}
