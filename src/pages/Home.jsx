@@ -75,6 +75,7 @@ const Home = () => {
       ? `${currentUserId}_${otherUserId}`
       : `${otherUserId}_${currentUserId}`;
 
+
     try {
       const chatRef = doc(db, "chats", combinedId);
       const chatSnap = await getDoc(chatRef);
@@ -146,7 +147,7 @@ const Home = () => {
         🗺️ Tap the camera icon to report an item
       </div>
       <div className="absolute top-14 left-12 bg-white px-4 py-2 rounded-full shadow-md text-sm font-semibold z-[1000]">
-        Once handovered please mark done ✅ in profile
+        Please mark done ✅ in profile after handovering
       </div>
 
       {/* Floating Camera Button */}

@@ -91,6 +91,9 @@ const Items = () => {
                 <p className="text-sm text-gray-600 mb-3">
                   {item.description}
                 </p>
+                <p className="text-sm text-gray-600 mb-3">
+                  Submitted To : {item.submitted_to}
+                </p>
 
                 {item.image && (
                   <img

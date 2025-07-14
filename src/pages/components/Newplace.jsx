@@ -12,46 +12,52 @@ const Newplace = () => {
   const [location, setLocation] = useState(null);
   const [form, setForm] = useState({ title: "", description: "" });
   const [facingMode, setFacingMode] = useState("environment");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const securityOptions = [
-  { value: "Main Gate Security", label: "Main Gate Security" },
-  { value: "Admin Security", label: "Admin Security" },
-  { value: "Orion Security", label: "Orion Security" },
-  { value: "Archie Security", label: "Archie Security" },
-  { value: "Ojas Security", label: "Ojas Security" },
-  { value: "GJCH Security", label: "GJCH Security" },
-  { value: "Hostel Office", label: "Hostel Office" },
-  { value: "Logos Security", label: "Logos Security" },
-  { value: "Third-Eye/Octa Security", label: "Third-Eye/Octa Security" },
-  { value: "Capstone Security", label: "Capstone Security" },
-  { value: "MM1 Mess", label: "MM1 Mess" },
-  { value: "MM2 Mess", label: "MM2 Mess" },
-  { value: "Sabari Mess", label: "Sabari Mess" },
-  { value: "Kailash Mess", label: "Kailash Mess" },
-  { value: "Annapoorna Mess", label: "Annapoorna Mess" },
-  { value: "Opal Mess", label: "Opal Mess" },
-  { value: "Hospital Security", label: "Hospital Security" },
-  { value: "Departments (Specify in description)", label: "Departments (Specify in description)" },
-  { value: "Others (Specify in description)", label: "Others (Specify in description)" },
+    { value: "Main Gate Security", label: "Main Gate Security" },
+    { value: "Admin Security", label: "Admin Security" },
+    { value: "Orion Security", label: "Orion Security" },
+    { value: "Archie Security", label: "Archie Security" },
+    { value: "Ojas Security", label: "Ojas Security" },
+    { value: "GJCH Security", label: "GJCH Security" },
+    { value: "Hostel Office", label: "Hostel Office" },
+    { value: "Logos Security", label: "Logos Security" },
+    { value: "Third-Eye/Octa Security", label: "Third-Eye/Octa Security" },
+    { value: "Capstone Security", label: "Capstone Security" },
+    { value: "MM1 Mess", label: "MM1 Mess" },
+    { value: "MM2 Mess", label: "MM2 Mess" },
+    { value: "Sabari Mess", label: "Sabari Mess" },
+    { value: "Kailash Mess", label: "Kailash Mess" },
+    { value: "Annapoorna Mess", label: "Annapoorna Mess" },
+    { value: "Opal Mess", label: "Opal Mess" },
+    { value: "Hospital Security", label: "Hospital Security" },
+    {
+      value: "Departments (Specify in description)",
+      label: "Departments (Specify in description)",
+    },
+    {
+      value: "Others (Specify in description)",
+      label: "Others (Specify in description)",
+    },
 
-  // Original Gemstone-Based
-  { value: "Coral Security", label: "Coral Security" },
-  { value: "Garnet Security", label: "Garnet Security" },
-  { value: "Opal Security", label: "Opal Security" },
-  { value: "Amber Security", label: "Amber Security" },
-  { value: "Zircon Security", label: "Zircon Security" },
-  { value: "Diamond Security", label: "Diamond Security" },
-  { value: "Jasper Security", label: "Jasper Security" },
-  { value: "Aquamarine Security", label: "Aquamarine Security" },
-  { value: "Topaz Security", label: "Topaz Security" },
-  { value: "Ruby Security", label: "Ruby Security" },
-  { value: "Sapphire Security", label: "Sapphire Security" },
-  { value: "Amethyst Security", label: "Amethyst Security" },
-  { value: "Pearl Security", label: "Pearl Security" },
-  { value: "Beryl Security", label: "Beryl Security" },
-];
-
+    // Original Gemstone-Based
+    { value: "Coral Security", label: "Coral Security" },
+    { value: "Garnet Security", label: "Garnet Security" },
+    { value: "Opal Security", label: "Opal Security" },
+    { value: "Amber Security", label: "Amber Security" },
+    { value: "Zircon Security", label: "Zircon Security" },
+    { value: "Diamond Security", label: "Diamond Security" },
+    { value: "Jasper Security", label: "Jasper Security" },
+    { value: "Aquamarine Security", label: "Aquamarine Security" },
+    { value: "Topaz Security", label: "Topaz Security" },
+    { value: "Ruby Security", label: "Ruby Security" },
+    { value: "Sapphire Security", label: "Sapphire Security" },
+    { value: "Amethyst Security", label: "Amethyst Security" },
+    { value: "Pearl Security", label: "Pearl Security" },
+    { value: "Beryl Security", label: "Beryl Security" },
+  ];
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -85,7 +91,10 @@ const Newplace = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!form.title || !form.description || !image || !location) return;
+
+    setLoading(true);
 
     try {
       const currentUser = auth.currentUser;
@@ -93,7 +102,7 @@ const Newplace = () => {
       const newItem = {
         title: form.title,
         description: form.description,
-        image, // base64 string
+        image,
         coordinates: [location.lat, location.lng],
         submitted_by: currentUser.uid,
         submitted_to: form.submitted,
@@ -104,6 +113,8 @@ const Newplace = () => {
       navigate("/");
     } catch (error) {
       console.error("Failed to submit item:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -138,7 +149,7 @@ const Newplace = () => {
           </div>
 
           {/* Fullscreen Camera */}
-          <div className="absolute inset-0 z-10">
+          <div className="absolute inset-0 z-10 ">
             <CameraPhoto
               isFullscreen={true}
               idealFacingMode={facingMode}
@@ -194,9 +205,40 @@ const Newplace = () => {
             />
             <button
               type="submit"
-              className="bg-yellow-500 hover:bg-yellow-600 text-white w-full py-2 rounded font-semibold"
+              disabled={loading}
+              className={`w-full py-2 rounded font-semibold text-white transition 
+    ${
+      loading
+        ? "bg-yellow-400 cursor-not-allowed"
+        : "bg-yellow-500 hover:bg-yellow-600"
+    }`}
             >
-              Submit
+              {loading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"
+                    />
+                  </svg>
+                  Submitting...
+                </div>
+              ) : (
+                "Submit"
+              )}
             </button>
           </form>
         </div>
