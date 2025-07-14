@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CameraPhoto from 'react-html5-camera-photo';
 import 'react-html5-camera-photo/build/css/index.css';
 import { useNavigate } from 'react-router-dom';
-import { Repeat } from 'lucide-react';
+import { Repeat, Image as ImageIcon } from 'lucide-react';
 import { auth, db } from '../../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -26,6 +26,17 @@ const Newplace = () => {
 
   const handleTakePhoto = (dataUri) => {
     setImage(dataUri);
+  };
+
+  const handleImagePick = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImage(reader.result);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleChange = (e) => {
@@ -65,13 +76,27 @@ const Newplace = () => {
     <div className="w-screen h-screen relative bg-white">
       {!image ? (
         <>
-          {/* Flip Button */}
-          <button
-            onClick={toggleCamera}
-            className="absolute top-4 right-4 bg-white text-black p-2 rounded-full z-20 shadow hover:bg-yellow-300"
-          >
-            <Repeat size={20} />
-          </button>
+          {/* Top Controls */}
+          <div className="absolute top-4 right-4 flex gap-2 z-20">
+            {/* Gallery Picker */}
+            <label className="bg-white text-black p-2 rounded-full shadow hover:bg-yellow-300 cursor-pointer">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImagePick}
+                className="hidden"
+              />
+              <ImageIcon size={20} />
+            </label>
+
+            {/* Flip Button */}
+            <button
+              onClick={toggleCamera}
+              className="bg-white text-black p-2 rounded-full shadow hover:bg-yellow-300"
+            >
+              <Repeat size={20} />
+            </button>
+          </div>
 
           {/* Fullscreen Camera */}
           <div className="absolute inset-0 z-10">
