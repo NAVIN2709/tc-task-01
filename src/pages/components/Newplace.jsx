@@ -10,7 +10,12 @@ import Select from "react-select";
 const Newplace = () => {
   const [image, setImage] = useState("");
   const [location, setLocation] = useState(null);
-  const [form, setForm] = useState({ title: "", description: "" });
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    type: "found", // 'lost' or 'found'
+    submitted: "",
+  });
   const [facingMode, setFacingMode] = useState("environment");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -41,8 +46,6 @@ const Newplace = () => {
       value: "Others (Specify in description)",
       label: "Others (Specify in description)",
     },
-
-    // Original Gemstone-Based
     { value: "Coral Security", label: "Coral Security" },
     { value: "Garnet Security", label: "Garnet Security" },
     { value: "Opal Security", label: "Opal Security" },
@@ -86,13 +89,21 @@ const Newplace = () => {
   };
 
   const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.title || !form.description || !image || !location) return;
+    if (
+      !form.title ||
+      !form.description ||
+      !image ||
+      !location ||
+      (form.type === "found" && !form.submitted)
+    )
+      return;
 
     setLoading(true);
 
@@ -105,11 +116,13 @@ const Newplace = () => {
         image,
         coordinates: [location.lat, location.lng],
         submitted_by: currentUser.uid,
-        submitted_to: form.submitted,
+        submitted_to: form.type === "found" ? form.submitted : null,
+        type: form.type,
         createdAt: serverTimestamp(),
       };
 
       await addDoc(collection(db, "items"), newItem);
+      console.log(newItem)
       navigate("/");
     } catch (error) {
       console.error("Failed to submit item:", error);
@@ -128,7 +141,6 @@ const Newplace = () => {
         <>
           {/* Top Controls */}
           <div className="absolute top-4 right-4 flex gap-2 z-20">
-            {/* Gallery Picker */}
             <label className="bg-white text-black p-2 rounded-full shadow hover:bg-yellow-300 cursor-pointer">
               <input
                 type="file"
@@ -138,8 +150,6 @@ const Newplace = () => {
               />
               <ImageIcon size={20} />
             </label>
-
-            {/* Flip Button */}
             <button
               onClick={toggleCamera}
               className="bg-white text-black p-2 rounded-full shadow hover:bg-yellow-300"
@@ -149,7 +159,7 @@ const Newplace = () => {
           </div>
 
           {/* Fullscreen Camera */}
-          <div className="absolute inset-0 z-10 ">
+          <div className="absolute inset-0 z-10">
             <CameraPhoto
               isFullscreen={true}
               idealFacingMode={facingMode}
@@ -158,7 +168,6 @@ const Newplace = () => {
           </div>
         </>
       ) : (
-        // Form After Photo
         <div className="p-4 max-w-lg mx-auto mt-6">
           <h1 className="text-xl font-bold mb-4 text-yellow-600">
             📍 Add Lost/Found Item
@@ -167,33 +176,60 @@ const Newplace = () => {
           <img src={image} alt="Captured" className="rounded w-full mb-4" />
 
           <form onSubmit={handleSubmit}>
+            <div className="flex gap-4 mb-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="type"
+                  value="found"
+                  checked={form.type === "found"}
+                  onChange={handleChange}
+                />
+                Found
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="type"
+                  value="lost"
+                  checked={form.type === "lost"}
+                  onChange={handleChange}
+                />
+                Lost
+              </label>
+            </div>
+
             <input
               name="title"
               value={form.title}
               onChange={handleChange}
-              placeholder="Name of the item found"
+              placeholder="Name of the item"
               className="w-full p-2 border border-black rounded mb-2"
               required
             />
-            <Select
-              options={securityOptions}
-              value={securityOptions.find(
-                (option) => option.value === form.submitted
-              )}
-              onChange={(selected) =>
-                setForm((prev) => ({ ...prev, submitted: selected.value }))
-              }
-              placeholder="Select or search handovered to..."
-              className="mb-2"
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  borderColor: "black",
-                  padding: "2px",
-                }),
-              }}
-              isSearchable
-            />
+
+            {form.type === "found" && (
+              <Select
+                options={securityOptions}
+                value={securityOptions.find(
+                  (option) => option.value === form.submitted
+                )}
+                onChange={(selected) =>
+                  setForm((prev) => ({ ...prev, submitted: selected.value }))
+                }
+                placeholder="Select or search handovered to..."
+                className="mb-2"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    borderColor: "black",
+                    padding: "2px",
+                  }),
+                }}
+                isSearchable
+              />
+            )}
+
             <textarea
               name="description"
               value={form.description}
@@ -203,15 +239,15 @@ const Newplace = () => {
               className="w-full p-2 border border-black rounded mb-2"
               required
             />
+
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-2 rounded font-semibold text-white transition 
-    ${
-      loading
-        ? "bg-yellow-400 cursor-not-allowed"
-        : "bg-yellow-500 hover:bg-yellow-600"
-    }`}
+              className={`w-full py-2 rounded font-semibold text-white transition ${
+                loading
+                  ? "bg-yellow-400 cursor-not-allowed"
+                  : "bg-yellow-500 hover:bg-yellow-600"
+              }`}
             >
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
