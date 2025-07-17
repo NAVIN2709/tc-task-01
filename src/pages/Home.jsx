@@ -60,9 +60,6 @@ const Home = () => {
     fetchItems();
   }, []);
 
-  // Optional: Tap to navigate to /newplace with location
-
-
   const handleOpenCamera = () => {
     navigate("/newplace");
   };
