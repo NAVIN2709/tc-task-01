@@ -202,7 +202,7 @@ const Profile = () => {
 
       {/* Public Note */}
       <div className="mt-10 text-sm text-gray-500">
-        👻 Your public profile on SnapMap
+        👻 Your public profile
       </div>
 
       {/* Sign Out */}

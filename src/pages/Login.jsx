@@ -29,8 +29,8 @@ const Login = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-yellow-400 px-6">
-      <img src={logo} alt="LostAF Logo" className="w-32 mb-6 drop-shadow" />
-      <h1 className="text-3xl font-bold text-black mb-6">LostAF</h1>
+      <img src={logo} alt="LostAF Logo" className="mb-6 drop-shadow" height={250} width={250}/>
+      <h1 className="text-3xl font-bold text-black mb-6">Lost And Found</h1>
 
       {/* 🔐 Google Login Button */}
       <button

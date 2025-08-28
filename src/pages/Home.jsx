@@ -26,7 +26,6 @@ import {
   setDoc
 } from "firebase/firestore";
 
-// Fix default marker icon
 const defaultIcon = L.icon({
   iconUrl: markerIconUrl,
   shadowUrl: markerShadowUrl,
@@ -41,7 +40,6 @@ const Home = () => {
 
   const [locations, setLocations] = useState([]);
 
-  // 🔥 Load from Firestore
   useEffect(() => {
     const fetchItems = async () => {
       try {
