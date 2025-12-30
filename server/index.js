@@ -27,10 +27,10 @@ const db = admin.firestore();
 
 /* ================= Send Notification ================= */
 app.post("/notify-new-item", async (req, res) => {
-  console.log(title,type)
   console.log("pushing new notif")
   try {
     const { title, type } = req.body;
+      console.log(title,type)
 
     if (!title || !type) {
       return res.status(400).json({ error: "Missing data" });
