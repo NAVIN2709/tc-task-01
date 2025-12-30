@@ -4,7 +4,6 @@ import {
   TileLayer,
   Marker,
   Popup,
-  useMapEvents,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -13,8 +12,7 @@ import markerShadowUrl from "leaflet/dist/images/marker-shadow.png";
 import { Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Footer from "./components/Footer";
-import { db } from "../firebase";
-import { auth } from "../firebase";
+import { db, auth } from "../firebase";
 import {
   collection,
   getDocs,
@@ -23,9 +21,11 @@ import {
   serverTimestamp,
   doc,
   getDoc,
-  setDoc
+  setDoc,
+  where,
 } from "firebase/firestore";
 
+/* ================= Leaflet Marker Fix ================= */
 const defaultIcon = L.icon({
   iconUrl: markerIconUrl,
   shadowUrl: markerShadowUrl,
@@ -34,21 +34,31 @@ const defaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = defaultIcon;
 
+/* ================= Component ================= */
 const Home = () => {
   const mapRef = useRef();
   const navigate = useNavigate();
 
   const [locations, setLocations] = useState([]);
+  const [selectedType, setSelectedType] = useState("lost"); // 🔴 lost | 🟢 found
 
+  /* ================= Fetch Items ================= */
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const q = query(collection(db, "items"), orderBy("createdAt", "desc"));
+        const q = query(
+          collection(db, "items"),
+          where("type", "==", selectedType),
+          orderBy("createdAt", "desc")
+        );
+
         const snapshot = await getDocs(q);
+
         const markers = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
+
         setLocations(markers);
       } catch (error) {
         console.error("Error fetching items:", error);
@@ -56,8 +66,9 @@ const Home = () => {
     };
 
     fetchItems();
-  }, []);
+  }, [selectedType]);
 
+  /* ================= Actions ================= */
   const handleOpenCamera = () => {
     navigate("/newplace");
   };
@@ -66,10 +77,10 @@ const Home = () => {
     const currentUserId = auth.currentUser?.uid;
     if (!currentUserId) return;
 
-    const combinedId = currentUserId > otherUserId
-      ? `${currentUserId}_${otherUserId}`
-      : `${otherUserId}_${currentUserId}`;
-
+    const combinedId =
+      currentUserId > otherUserId
+        ? `${currentUserId}_${otherUserId}`
+        : `${otherUserId}_${currentUserId}`;
 
     try {
       const chatRef = doc(db, "chats", combinedId);
@@ -88,13 +99,14 @@ const Home = () => {
     }
   };
 
+  /* ================= Render ================= */
   return (
     <div className="h-screen w-full relative">
       <MapContainer
         center={[10.7602, 78.8142]}
         zoom={15}
-        scrollWheelZoom={true}
-        whenCreated={(mapInstance) => (mapRef.current = mapInstance)}
+        scrollWheelZoom
+        whenCreated={(map) => (mapRef.current = map)}
         style={{ height: "calc(100vh - 64px)", width: "100%" }}
       >
         <TileLayer
@@ -108,26 +120,31 @@ const Home = () => {
               <div className="text-sm font-semibold text-black mb-1">
                 {loc.title}
               </div>
+
               <div className="text-xs text-gray-700 mb-2">
                 {loc.description}
               </div>
+
               <div className="text-xs text-gray-700 mb-2">
                 Submitted To: {loc.submitted_to}
+              </div>
+
+              <div className="text-xs font-semibold mb-2">
+                {loc.type === "lost" ? "🔴 Lost Item" : "🟢 Found Item"}
               </div>
 
               {loc.image && (
                 <img
                   src={loc.image}
-                  alt="Lost Item"
+                  alt="Item"
                   className="w-full max-w-[120px] rounded mb-2"
                 />
               )}
 
-              {/* Only show report if user is not the owner */}
               {auth.currentUser?.uid !== loc.submitted_by && (
                 <button
                   onClick={() => handleReport(loc.submitted_by)}
-                  className="mt-1 bg-red-500 hover:bg-red-600 text-white text-xs px-4 py-1 rounded-full font-medium transition duration-200"
+                  className="mt-1 bg-red-500 hover:bg-red-600 text-white text-xs px-4 py-1 rounded-full font-medium transition"
                 >
                   🚨 Report
                 </button>
@@ -137,15 +154,30 @@ const Home = () => {
         ))}
       </MapContainer>
 
-      {/* Info Note */}
+      {/* ================= Info Notes ================= */}
       <div className="absolute top-4 left-12 bg-white px-4 py-2 rounded-full shadow-md text-sm font-semibold z-[1000]">
         🗺️ Tap the camera icon to report an item
       </div>
-      <div className="absolute top-14 left-12 bg-white px-4 py-2 rounded-full shadow-md text-sm font-semibold z-[1000]">
-        Please mark done ✅ in profile after handovering
+
+      {/* ================= Lost / Found Tabs ================= */}
+      <div className="absolute top-15 left-20 bg-white rounded-full shadow-md flex overflow-hidden z-[1000]">
+        {["lost", "found"].map((type) => (
+          <button
+            key={type}
+            onClick={() => setSelectedType(type)}
+            className={`px-5 py-2 text-sm font-semibold transition-all
+              ${
+                selectedType === type
+                  ? "bg-black text-white"
+                  : "bg-white text-black hover:bg-gray-100"
+              }`}
+          >
+            {type === "lost" ? "🔴 Lost" : "🟢 Found"}
+          </button>
+        ))}
       </div>
 
-      {/* Floating Camera Button */}
+      {/* ================= Floating Camera Button ================= */}
       <div
         onClick={handleOpenCamera}
         className="bg-yellow-400 rounded-full p-3 shadow-xl absolute bottom-20 left-1/2 transform -translate-x-1/2 z-[6000] cursor-pointer"

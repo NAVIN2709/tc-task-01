@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 import Footer from './components/Footer';
 import { db, auth } from '../firebase';
 import {
@@ -10,10 +10,12 @@ import {
   doc,
   getDoc
 } from 'firebase/firestore';
+import { ArrowLeft } from 'lucide-react';
 
 const Chats = () => {
   const [chats, setChats] = useState([]);
   const currentUser = auth.currentUser;
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -53,9 +55,18 @@ const Chats = () => {
     fetchChats();
   }, [currentUser]);
 
+  const handleBack = () =>{
+    navigate(-1)
+  }
+
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <h1 className="text-xl font-bold text-yellow-600 p-4">📨 Private Chats</h1>
+    <div className="flex flex-col min-h-screen bg-white p-3">
+      <div className="topbar flex mt-5">
+        <div className="backbutton mr-2" onClick={handleBack}>
+          <ArrowLeft/>
+        </div>
+        <h1 className="text-xl font-bold text-yellow-600">📨 Private Chats</h1>
+      </div>
       <div className="flex-1 px-4">
         {chats.map((chat) => (
           <Link

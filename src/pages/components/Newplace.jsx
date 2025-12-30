@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import CameraPhoto from "react-html5-camera-photo";
 import "react-html5-camera-photo/build/css/index.css";
 import { useNavigate } from "react-router-dom";
-import { Repeat, Image as ImageIcon } from "lucide-react";
+import { Repeat, Image as ImageIcon, ArrowLeft } from "lucide-react";
 import { auth, db } from "../../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import Select from "react-select";
@@ -122,7 +122,19 @@ const Newplace = () => {
       };
 
       await addDoc(collection(db, "items"), newItem);
-      console.log(newItem)
+      // 🔔 Trigger push notification
+      await fetch(import.meta.env.VITE_BACKEND_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: newItem.title,
+          type: newItem.type,
+        }),
+      });
+
+      console.log("Item posted & notification sent");
       navigate("/");
     } catch (error) {
       console.error("Failed to submit item:", error);
@@ -134,7 +146,9 @@ const Newplace = () => {
   const toggleCamera = () => {
     setFacingMode((prev) => (prev === "environment" ? "user" : "environment"));
   };
-
+  const handleBack = () => {
+    navigate("/");
+  };
   return (
     <div className="w-screen h-screen relative bg-white">
       {!image ? (
@@ -169,9 +183,14 @@ const Newplace = () => {
         </>
       ) : (
         <div className="p-4 max-w-lg mx-auto mt-6">
-          <h1 className="text-xl font-bold mb-4 text-yellow-600">
-            📍 Add Lost/Found Item
-          </h1>
+          <div className="topbar flex">
+            <div className="backbutton" onClick={handleBack}>
+              <ArrowLeft />
+            </div>
+            <h1 className="text-xl font-bold mb-4 text-yellow-600">
+              📍 Add Lost/Found Item
+            </h1>
+          </div>
 
           <img src={image} alt="Captured" className="rounded w-full mb-4" />
 

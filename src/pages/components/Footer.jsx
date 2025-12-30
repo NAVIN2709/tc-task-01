@@ -9,7 +9,7 @@ const Footer = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-black text-white flex items-center justify-around h-16 shadow-lg z-50 border-t">
+    <div className="fixed bottom-0 left-0 w-full bg-black text-white flex items-center justify-around h-16 shadow-lg z-150 border-t">
       
       {/* Map */}
       <Link to="/" className="flex flex-col items-center text-xs">
