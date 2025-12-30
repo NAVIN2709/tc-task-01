@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { db, auth,messaging } from "../firebase";
-import {
-  doc,
-  setDoc,
-  serverTimestamp,
-  getDoc,
-} from "firebase/firestore";
+import { db, auth, messaging } from "../firebase";
+import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { getMessaging, getToken } from "firebase/messaging";
 import { useNavigate } from "react-router-dom";
 
@@ -25,8 +20,8 @@ const saveFcmToken = async (userId) => {
 
     // 1️⃣ Register Service Worker
     let registration;
-    if ('serviceWorker' in navigator) {
-      registration = await navigator.serviceWorker.register('/sw.js');
+    if ("serviceWorker" in navigator) {
+      registration = await navigator.serviceWorker.register("/sw.js");
     }
 
     // 2️⃣ Request Notification Permission
@@ -38,8 +33,9 @@ const saveFcmToken = async (userId) => {
 
     // 3️⃣ Get FCM Token
     const token = await getToken(messaging, {
-      vapidKey: "BNd8QsYSe4Pmtqgs7o4E1nSaDycK_pQyC1lIgD3FvxQJCzbMqlbjE-tuucysFX1FDxJRQnthPnwi80GGr4gum_U",
-      serviceWorkerRegistration: registration, 
+      vapidKey:
+        "BNd8QsYSe4Pmtqgs7o4E1nSaDycK_pQyC1lIgD3FvxQJCzbMqlbjE-tuucysFX1FDxJRQnthPnwi80GGr4gum_U",
+      serviceWorkerRegistration: registration,
     });
 
     if (!token) return;
@@ -61,12 +57,12 @@ const saveFcmToken = async (userId) => {
   }
 };
 
-
 /* ================= COMPONENT ================= */
 const Onboarding = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   /* ================= Check Existing User ================= */
   useEffect(() => {
@@ -106,6 +102,7 @@ const Onboarding = () => {
     }
 
     try {
+      setLoading(true);
       const userDocRef = doc(db, "users", user.uid);
 
       const userData = {
@@ -126,6 +123,8 @@ const Onboarding = () => {
     } catch (error) {
       console.error("Onboarding error:", error);
       alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -171,10 +170,10 @@ const Onboarding = () => {
       {/* Submit */}
       <button
         onClick={handleSubmit}
-        disabled={!username.trim()}
+        disabled={!username.trim() || loading}
         className="bg-black text-white px-6 py-3 rounded-full font-semibold hover:opacity-90 transition disabled:opacity-40"
       >
-        Submit
+        {loading ? "Loading ..." : "Submit"}
       </button>
     </div>
   );
