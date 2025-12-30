@@ -8,7 +8,7 @@ dotenv.config();
 const serviceAccount = {
   type: process.env.FIREBASE_TYPE,
   project_id: process.env.FIREBASE_PROJECT_ID,
-  private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'), // important!
+  private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
   client_email: process.env.FIREBASE_CLIENT_EMAIL,
   client_id: process.env.FIREBASE_CLIENT_ID,
 };
@@ -27,6 +27,8 @@ const db = admin.firestore();
 
 /* ================= Send Notification ================= */
 app.post("/notify-new-item", async (req, res) => {
+  console.log(title,type)
+  console.log("pushing new notif")
   try {
     const { title, type } = req.body;
 
@@ -59,7 +61,7 @@ app.post("/notify-new-item", async (req, res) => {
       },
       webpush: {
         fcmOptions: {
-          link: "https://yourwebsite.com/items",
+          link: "https://lostandfoundnitt.vercel.app/items",
         },
       },
       tokens,
