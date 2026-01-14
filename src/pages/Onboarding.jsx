@@ -132,7 +132,7 @@ const Onboarding = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-yellow-400 px-6 py-10 text-center">
       <h1 className="text-3xl font-extrabold text-black mb-4">
-        Pick your vibe 👻
+        Pick your name 👻
       </h1>
 
       {/* Username Input */}

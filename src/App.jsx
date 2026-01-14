@@ -22,17 +22,13 @@ const App = () => {
         <Route
           path="/"
           element={
-            <PrivateRoute>
               <Home />
-            </PrivateRoute>
           }
         />
         <Route
           path="/items"
           element={
-            <PrivateRoute>
               <Items />
-            </PrivateRoute>
           }
         />
         <Route

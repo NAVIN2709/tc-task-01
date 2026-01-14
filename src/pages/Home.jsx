@@ -70,6 +70,10 @@ const Home = () => {
 
   /* ================= Actions ================= */
   const handleOpenCamera = () => {
+    if (!auth.currentUser) {
+      navigate("/login");
+      return;
+    }
     navigate("/newplace");
   };
 

@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import Footer from "../pages/components/Footer";
+import { Share2 } from "lucide-react";
 
 const Items = () => {
   const [items, setItems] = useState([]);
@@ -48,6 +49,11 @@ const Items = () => {
 
   /* ================= Chat ================= */
   const handleReport = async (otherUserId) => {
+    if (!auth.currentUser) {
+      console.log("User not authenticated, redirecting to login.");
+      navigate("/login");
+      return;
+    }
     const currentUserId = auth.currentUser?.uid;
     if (!currentUserId || !otherUserId) return;
 
@@ -90,6 +96,41 @@ const Items = () => {
     );
   }, [items, search]);
 
+  const handleShare = (item) => {
+    const message = `
+Hi everyone,
+
+${
+  item.type === "lost"
+    ? `I lost an item and need some help.`
+    : `An item was found and we are trying to locate the owner.`
+}
+
+Item: ${item.title}
+
+Details:
+${item.description}
+
+${item.submitted_to ? `Submitted To: ${item.submitted_to}` : ""}
+
+If this belongs to you or someone you know, please check the details here:
+${window.location.href}
+`;
+
+    if (navigator.share) {
+      navigator
+        .share({
+          title: "Lost & Found Item",
+          text: message,
+        })
+        .catch(() => {});
+    } else {
+      const fallbackText = `${message}\n\n${window.location.href}`;
+      navigator.clipboard.writeText(fallbackText);
+      alert("Link copied to clipboard!");
+    }
+  };
+
   /* ================= Loading ================= */
   if (loading) {
     return (
@@ -114,7 +155,6 @@ const Items = () => {
 
   return (
     <div className="min-h-screen flex flex-col pb-24">
-
       {/* ================= Sticky Header ================= */}
       <div className="sticky top-0 z-10 bg-yellow-100 border-b border-yellow-300 shadow-md">
         <div className="py-4 px-4">
@@ -159,7 +199,7 @@ const Items = () => {
       </div>
 
       {/* ================= Items List ================= */}
-      <div className="p-4 max-w-2xl mx-auto flex-1">
+      <div className="p-4 max-w-2xl mx-auto flex-1 w-full">
         {filteredItems.length === 0 ? (
           <div className="text-gray-500 mt-10 text-center">
             No matching {selectedType} items found.
@@ -175,9 +215,7 @@ const Items = () => {
                   {item.title}
                 </h2>
 
-                <p className="text-sm text-gray-600 mb-3">
-                  {item.description}
-                </p>
+                <p className="text-sm text-gray-600 mb-3">{item.description}</p>
 
                 {item.submitted_to && (
                   <p className="text-sm text-gray-600 mb-3">
@@ -190,11 +228,21 @@ const Items = () => {
                 </p>
 
                 {item.image && (
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="rounded-lg w-full object-cover max-h-56 mb-4"
-                  />
+                  <div className="relative mb-4">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="rounded-lg w-full object-cover max-h-56"
+                    />
+
+                    <button
+                      onClick={() => handleShare(item)}
+                      className="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition"
+                      title="Share"
+                    >
+                      <Share2 size={16} className="text-gray-800" />
+                    </button>
+                  </div>
                 )}
 
                 {item.submitted_by &&
