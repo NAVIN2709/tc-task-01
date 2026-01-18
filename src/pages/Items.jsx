@@ -30,7 +30,7 @@ const Items = () => {
       const q = query(
         collection(db, "items"),
         where("type", "==", selectedType),
-        orderBy("createdAt", "desc")
+        orderBy("createdAt", "desc"),
       );
 
       const snapshot = await getDocs(q);
@@ -92,7 +92,7 @@ const Items = () => {
     return items.filter(
       (item) =>
         item.title?.toLowerCase().includes(text) ||
-        item.description?.toLowerCase().includes(text)
+        item.description?.toLowerCase().includes(text),
     );
   }, [items, search]);
 
@@ -143,6 +143,33 @@ ${window.location.href}
             <p className="text-sm text-gray-600">
               See what's reported around campus
             </p>
+          </div>
+          <div className="flex justify-center pb-3">
+            <div className="bg-white rounded-full shadow-md flex overflow-hidden">
+              {["lost", "found"].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setSelectedType(type)}
+                  className={`px-6 py-2 text-sm font-semibold transition-all
+                  ${
+                    selectedType === type
+                      ? "bg-black text-white"
+                      : "bg-white text-black hover:bg-gray-100"
+                  }`}
+                >
+                  {type === "lost" ? "🔴 Lost" : "🟢 Found"}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="px-4 pb-4">
+            <input
+              type="text"
+              placeholder="🔍 Search items..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full max-w-2xl mx-auto block px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            />
           </div>
         </div>
         <div className="text-center mt-12 text-gray-500">

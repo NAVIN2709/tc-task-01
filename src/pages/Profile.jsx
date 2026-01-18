@@ -110,8 +110,9 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-yellow-100">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="animate-spin w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full"></div>
+        <Footer />
       </div>
     );
   }
@@ -212,7 +213,6 @@ const Profile = () => {
       >
         🚪 Sign Out
       </button>
-
       <Footer />
     </div>
   );

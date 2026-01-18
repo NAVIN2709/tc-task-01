@@ -14,7 +14,13 @@ const serviceAccount = {
 };
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: ["https://lostandfoundnitt.vercel.app"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 /* ================= Firebase Admin ================= */
