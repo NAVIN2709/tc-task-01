@@ -1,15 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-} from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import markerIconUrl from "leaflet/dist/images/marker-icon.png";
 import markerShadowUrl from "leaflet/dist/images/marker-shadow.png";
 import { Camera } from "lucide-react";
+import InstallAppButton from "./components/InstallButton";
 import { useNavigate } from "react-router-dom";
 import Footer from "./components/Footer";
 import { db, auth } from "../firebase";
@@ -49,7 +45,7 @@ const Home = () => {
         const q = query(
           collection(db, "items"),
           where("type", "==", selectedType),
-          orderBy("createdAt", "desc")
+          orderBy("createdAt", "desc"),
         );
 
         const snapshot = await getDocs(q);
@@ -106,6 +102,10 @@ const Home = () => {
   /* ================= Render ================= */
   return (
     <div className="h-screen w-full relative">
+      <div className="absolute top-4 left-4 sm:top-10 sm:left-10 z-[6000]">
+        <InstallAppButton />
+      </div>
+
       <MapContainer
         center={[10.7602, 78.8142]}
         zoom={15}
