@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import PrivateRoute from "./pages/components/PrivateRoute";
 import Onboarding from "./pages/Onboarding";
 import Items from "./pages/Items";
+import CollgeInvitePage from "./pages/CollegeInvite";
 
 const App = () => {
   return (
@@ -17,20 +18,11 @@ const App = () => {
         {/* Public Route */}
         <Route path="/login" element={<Login />} />
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/invite/:name" element={<CollgeInvitePage />} />
 
         {/* Protected Routes */}
-        <Route
-          path="/"
-          element={
-              <Home />
-          }
-        />
-        <Route
-          path="/items"
-          element={
-              <Items />
-          }
-        />
+        <Route path="/" element={<Home />} />
+        <Route path="/items" element={<Items />} />
         <Route
           path="/chats"
           element={

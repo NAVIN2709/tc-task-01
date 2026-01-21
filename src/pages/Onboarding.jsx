@@ -90,6 +90,7 @@ const Onboarding = () => {
   /* ================= SUBMIT ================= */
   const handleSubmit = async () => {
     const user = auth.currentUser;
+    const collegeId = localStorage.getItem("collegeId")
 
     if (!user) {
       alert("Not signed in!");
@@ -110,6 +111,7 @@ const Onboarding = () => {
         profile_pic: profilePics[selectedIndex],
         onboarding_completed: true,
         created: serverTimestamp(),
+        collegeId : collegeId 
       };
 
       // 1️⃣ Save profile data
