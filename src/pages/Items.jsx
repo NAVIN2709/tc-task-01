@@ -19,7 +19,7 @@ const Items = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState("lost");
-  const [search, setSearch] = useState(""); // 🔍 search text
+  const [search, setSearch] = useState("");
 
   const navigate = useNavigate();
 

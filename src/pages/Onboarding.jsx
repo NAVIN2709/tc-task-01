@@ -4,6 +4,7 @@ import { db, auth, messaging } from "../firebase";
 import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { getMessaging, getToken } from "firebase/messaging";
 import { useNavigate } from "react-router-dom";
+import collegeData from "../data/collegeData.json"
 
 const profilePics = [
   "https://api.dicebear.com/7.x/bottts/svg?seed=Ghost1",
@@ -48,7 +49,7 @@ const saveFcmToken = async (userId) => {
         notificationsEnabled: true,
         tokenUpdatedAt: serverTimestamp(),
       },
-      { merge: true }
+      { merge: true },
     );
 
     console.log("FCM token saved");
@@ -63,18 +64,30 @@ const Onboarding = () => {
   const [username, setUsername] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [loading, setLoading] = useState(false);
-
+  const [collegeId, setCollege] = useState("");
+  const [collegeLocked, setCollegeLocked] = useState(false);
+  
   /* ================= Check Existing User ================= */
   useEffect(() => {
-    const user = auth.currentUser;
-    if (!user) return;
+    const savedCollegeId = localStorage.getItem("collegeId");
 
-    const userDocRef = doc(db, "users", user.uid);
-    getDoc(userDocRef).then((snap) => {
-      if (snap.exists() && snap.data().onboarding_completed) {
-        navigate("/");
-      }
-    });
+    if (savedCollegeId) {
+      setCollege(savedCollegeId);
+      setCollegeLocked(true);
+    }
+
+    const user = auth.currentUser;
+    if (!user) {
+      navigate("/login");
+    } 
+    else {
+      const userDocRef = doc(db, "users", user.uid);
+      getDoc(userDocRef).then((snap) => {
+        if (snap.exists() && snap.data().onboarding_completed) {
+          navigate("/");
+        }
+      });
+    }
   }, [navigate]);
 
   const handleNext = () => {
@@ -83,14 +96,18 @@ const Onboarding = () => {
 
   const handlePrev = () => {
     setSelectedIndex((prev) =>
-      prev === 0 ? profilePics.length - 1 : prev - 1
+      prev === 0 ? profilePics.length - 1 : prev - 1,
     );
   };
 
   /* ================= SUBMIT ================= */
   const handleSubmit = async () => {
     const user = auth.currentUser;
-    const collegeId = localStorage.getItem("collegeId")
+    if (!collegeId) {
+      alert("Please select your college.");
+      return;
+    }
+    localStorage.setItem("collegeId", collegeId);
 
     if (!user) {
       alert("Not signed in!");
@@ -111,7 +128,7 @@ const Onboarding = () => {
         profile_pic: profilePics[selectedIndex],
         onboarding_completed: true,
         created: serverTimestamp(),
-        collegeId : collegeId 
+        collegeId: collegeId,
       };
 
       // 1️⃣ Save profile data
@@ -168,11 +185,33 @@ const Onboarding = () => {
           <ChevronRight className="w-5 h-5 text-black" />
         </button>
       </div>
+      {/* College Dropdown */}
+      <select
+        value={collegeId}
+        onChange={(e) => setCollege(e.target.value)}
+        disabled={collegeLocked}
+        className="mb-6 px-4 py-3 rounded-full w-full max-w-sm text-center text-black border border-yellow-300 shadow focus:outline-none focus:ring-2 focus:ring-black"
+      >
+        <option value="" disabled>
+          Select your college 🎓
+        </option>
+
+        {Object.entries(collegeData).map(([name, id]) => (
+          <option key={id} value={id}>
+            {name.toUpperCase()}
+          </option>
+        ))}
+      </select>
+      {collegeLocked && (
+        <p className="text-sm text-black/70 mb-4">
+          College is locked and cannot be changed 🎓
+        </p>
+      )}
 
       {/* Submit */}
       <button
         onClick={handleSubmit}
-        disabled={!username.trim() || loading}
+        disabled={!username.trim() || loading || !collegeId}
         className="bg-black text-white px-6 py-3 rounded-full font-semibold hover:opacity-90 transition disabled:opacity-40"
       >
         {loading ? "Loading ..." : "Submit"}

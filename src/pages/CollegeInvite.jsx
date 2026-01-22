@@ -1,16 +1,10 @@
 import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import collegeData from "../data/collegeData.json"
 
 const CollegeInvitePage = () => {
   const { name } = useParams();
   const navigate = useNavigate();
-
-  const collegeData = {
-    nitt: "001",
-    nitr: "002",
-    iitd: "003",
-    iitm: "004",
-  };
 
   useEffect(() => {
     const collegeId = collegeData[name.toLowerCase()];

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Share2 } from "lucide-react";
 import Footer from "./components/Footer";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
@@ -14,6 +15,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
+import collegeData from "../data/collegeData.json";
 
 const Profile = () => {
   const [username, setUsername] = useState("");
@@ -55,7 +57,7 @@ const Profile = () => {
       try {
         const q = query(
           collection(db, "items"),
-          where("submitted_by", "==", user.uid)
+          where("submitted_by", "==", user.uid),
         );
         const snapshot = await getDocs(q);
         const items = snapshot.docs.map((doc) => ({
@@ -70,6 +72,16 @@ const Profile = () => {
 
     fetchUserItems();
   }, [user]);
+
+  const collegeId = localStorage.getItem("collegeId");
+
+  const collegeName =
+    collegeId &&
+    Object.keys(collegeData).find((key) => collegeData[key] === collegeId);
+
+  const inviteUrl = collegeName
+    ? `${window.location.origin}/invite/${collegeName}`
+    : null;
 
   // Save updated username
   const handleSave = async () => {
@@ -91,6 +103,7 @@ const Profile = () => {
   // Sign out
   const handleSignOut = async () => {
     try {
+      localStorage.removeItem("collegeId");
       await signOut(auth);
       navigate("/login");
     } catch (error) {
@@ -108,6 +121,29 @@ const Profile = () => {
     }
   };
 
+  const handleShare = async () => {
+    if (!inviteUrl) return;
+
+    const shareData = {
+      title: "Try this app",
+      text: "Hey! Try out this app 👋",
+      url: inviteUrl,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(
+          `${shareData.text}\n${shareData.url}`,
+        );
+        alert("Invite link copied to clipboard!");
+      }
+    } catch (err) {
+      console.error("Share failed:", err);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
@@ -122,7 +158,9 @@ const Profile = () => {
       {/* Avatar */}
       <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-yellow-300 shadow-md mb-4">
         <img
-          src={profilePic || "https://api.dicebear.com/7.x/bottts/svg?seed=Ghost"}
+          src={
+            profilePic || "https://api.dicebear.com/7.x/bottts/svg?seed=Ghost"
+          }
           alt="avatar"
           className="w-full h-full object-cover"
         />
@@ -184,7 +222,9 @@ const Profile = () => {
                     />
                   )}
                   <div className="flex-1">
-                    <p className="font-semibold text-yellow-700">{item.title}</p>
+                    <p className="font-semibold text-yellow-700">
+                      {item.title}
+                    </p>
                     <p className="text-sm text-gray-600">{item.description}</p>
                   </div>
                 </div>
@@ -202,9 +242,39 @@ const Profile = () => {
       </div>
 
       {/* Public Note */}
-      <div className="mt-10 text-sm text-gray-500">
+      <div className="mt-10 text-base text-gray-500">
         👻 Your public profile
       </div>
+
+      {/* Invite Friends */}
+      {inviteUrl && (
+        <div className="mt-4 w-full max-w-sm flex">
+          <p className="text-sm text-gray-700 font-medium text-center mb-3">
+            🎓 Invite friends from your college
+          </p>
+
+          <button
+            onClick={handleShare}
+            className="
+        w-60
+        flex
+        items-center
+        justify-center
+        gap-2
+        bg-yellow-500
+        hover:bg-yellow-600
+        text-white
+        font-semibold
+        py-2
+        rounded-full
+        shadow-md
+      "
+          >
+            <Share2 className="w-5 h-5" />
+            Share App
+          </button>
+        </div>
+      )}
 
       {/* Sign Out */}
       <button
