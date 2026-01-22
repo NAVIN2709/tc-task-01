@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Share2 } from "lucide-react";
+import { Info, X } from "lucide-react";
 import Footer from "./components/Footer";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../firebase";
@@ -24,7 +25,8 @@ const Profile = () => {
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(true);
   const [userItems, setUserItems] = useState([]);
-  const [collegeId,setCollegeId] = useState("");
+  const [collegeId, setCollegeId] = useState("");
+  const [showContactModal, setShowContactModal] = useState(false);
 
   const navigate = useNavigate();
   const user = auth.currentUser;
@@ -42,8 +44,8 @@ const Profile = () => {
         setUsername(data.username);
         setInputValue(data.username);
         setProfilePic(data.profile_pic);
-        localStorage.setItem("collegeId",data.collegeId)
-        setCollegeId(data.collegeId)
+        localStorage.setItem("collegeId", data.collegeId);
+        setCollegeId(data.collegeId);
       }
 
       setLoading(false);
@@ -75,7 +77,6 @@ const Profile = () => {
 
     fetchUserItems();
   }, [user]);
-
 
   const collegeName =
     collegeId &&
@@ -157,6 +158,24 @@ const Profile = () => {
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen pt-16 bg-white px-4">
+      <button
+        onClick={() => setShowContactModal(true)}
+        className="
+    absolute
+    top-4
+    right-4
+    flex
+    items-center
+    gap-2
+    text-yellow-600
+    hover:text-yellow-700
+    font-medium
+  "
+      >
+        <Info className="w-5 h-5" />
+        <span className="text-sm">Help</span>
+      </button>
+
       {/* Avatar */}
       <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-yellow-300 shadow-md mb-4">
         <img
@@ -286,6 +305,67 @@ const Profile = () => {
         🚪 Sign Out
       </button>
       <Footer />
+
+      {showContactModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="relative bg-white w-11/12 max-w-md rounded-xl shadow-lg p-6">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowContactModal(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-black"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Title */}
+            <h2 className="text-lg font-bold text-yellow-600 mb-3 text-center">
+              📩 Contact & Support
+            </h2>
+
+            {/* Contact Info */}
+            <div className="text-sm text-gray-700 space-y-2">
+              <p>
+                For any queries, feedback, or issues, feel free to reach out:
+              </p>
+              <p>
+                📧 Email:{" "}
+                <a
+                  href="mailto:snavinnitt2006@gmail.com"
+                  className="text-yellow-600 underline"
+                >
+                  navinnitt2006@gmail.com
+                </a>
+              </p>
+            </div>
+
+            {/* Divider */}
+            <div className="my-4 border-t"></div>
+
+            {/* Policy Links */}
+            <div className="flex flex-col gap-2 text-center text-sm">
+              <button
+                onClick={() => {
+                  setShowContactModal(false);
+                  navigate("/terms-and-conditions");
+                }}
+                className="text-blue-600 hover:underline"
+              >
+                📄 Terms & Conditions
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowContactModal(false);
+                  navigate("/privacy-policies");
+                }}
+                className="text-blue-600 hover:underline"
+              >
+                🔐 Privacy Policy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

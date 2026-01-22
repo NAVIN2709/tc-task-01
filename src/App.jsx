@@ -10,6 +10,8 @@ import PrivateRoute from "./pages/components/PrivateRoute";
 import Onboarding from "./pages/Onboarding";
 import Items from "./pages/Items";
 import CollgeInvitePage from "./pages/CollegeInvite";
+import TermsAndConditions from "./pages/TermsAndConditionsPage"
+import PrivacyPolicies from "./pages/PrivacyPolicyPage"
 
 const App = () => {
   return (
@@ -19,6 +21,9 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/invite/:name" element={<CollgeInvitePage />} />
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/privacy-policies" element={<PrivacyPolicies />} />
+        
 
         {/* Protected Routes */}
         <Route path="/" element={<Home />} />

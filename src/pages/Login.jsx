@@ -151,6 +151,24 @@ const Login = () => {
               {loading ? "Signing in..." : "Continue with Google"}
             </span>
           </button>
+          {/* Terms & Privacy */}
+          <p className="text-xs text-black/80 text-center mt-2 leading-relaxed">
+            By continuing, you agree to our{" "}
+            <a
+              href="/terms-and-conditions"
+              className="underline font-medium hover:text-black"
+            >
+              Terms & Conditions
+            </a>{" "}
+            and{" "}
+            <a
+              href="/privacy-policies"
+              className="underline font-medium hover:text-black"
+            >
+              Privacy Policy
+            </a>
+            .
+          </p>
         </div>
       )}
     </div>
