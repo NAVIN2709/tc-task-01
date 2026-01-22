@@ -24,6 +24,7 @@ const Profile = () => {
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(true);
   const [userItems, setUserItems] = useState([]);
+  const [collegeId,setCollegeId] = useState("");
 
   const navigate = useNavigate();
   const user = auth.currentUser;
@@ -41,6 +42,8 @@ const Profile = () => {
         setUsername(data.username);
         setInputValue(data.username);
         setProfilePic(data.profile_pic);
+        localStorage.setItem("collegeId",data.collegeId)
+        setCollegeId(data.collegeId)
       }
 
       setLoading(false);
@@ -73,7 +76,6 @@ const Profile = () => {
     fetchUserItems();
   }, [user]);
 
-  const collegeId = localStorage.getItem("collegeId");
 
   const collegeName =
     collegeId &&
@@ -126,7 +128,7 @@ const Profile = () => {
 
     const shareData = {
       title: "Try this app",
-      text: "Hey! Try out this app 👋",
+      text: "Hey! Try out this cool snapchat style app to find your lost things !",
       url: inviteUrl,
     };
 
@@ -144,7 +146,7 @@ const Profile = () => {
     }
   };
 
-  if (loading) {
+  if (loading || !userItems || !user) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="animate-spin w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full"></div>
