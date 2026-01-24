@@ -79,8 +79,8 @@ const Profile = () => {
   }, [user]);
 
   const collegeName =
-      collegeId &&
-      Object.keys(collegeData).find((key) => collegeData[key].id === collegeId);
+    collegeId &&
+    Object.keys(collegeData).find((key) => collegeData[key].id === collegeId);
 
   const inviteUrl = collegeName
     ? `${window.location.origin}/invite/${collegeName}`
@@ -124,6 +124,10 @@ const Profile = () => {
     }
   };
 
+  const handleLogin = () => {
+    navigate("/login");
+  };
+
   const handleShare = async () => {
     if (!inviteUrl) return;
 
@@ -147,10 +151,29 @@ const Profile = () => {
     }
   };
 
-  if (loading || !userItems || !user) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="animate-spin w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full"></div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-start min-h-screen pt-16 bg-white px-4">
+        <div className="button flex flex-col items-center justify-center mt-10">
+          <p className="mt-2 text-lg text-gray-600">
+            To view your profile , please login
+          </p>
+          <button
+            onClick={handleLogin}
+            className="bg-yellow-400 px-2 py-3 text-md mt-2 text-center text-black w-40 rounded-full font-semibold"
+          >
+            Login
+          </button>
+        </div>
         <Footer />
       </div>
     );

@@ -126,6 +126,9 @@ ${window.location.href}
       alert("Link copied to clipboard!");
     }
   };
+  const handleLogin = () => {
+    navigate("/login");
+  };
 
   if (loading) {
     return (
@@ -169,6 +172,33 @@ ${window.location.href}
         </div>
         <div className="text-center mt-12 text-gray-500">
           🔄 Loading items...
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!items) {
+    return (
+      <div className="min-h-screen flex flex-col pb-24">
+        <div className="sticky top-0 z-10 bg-yellow-100 border-b border-yellow-300 shadow-md">
+          <div className="py-4 px-4">
+            <h1 className="text-2xl font-bold text-yellow-600">
+              📦 Lost & Found
+            </h1>
+            <p className="text-sm text-gray-600">
+              See what's reported around campus
+            </p>
+          </div>
+        </div>
+        <div className="button flex flex-col items-center justify-center"> 
+          <p className="mt-2 text-lg text-gray-600">To view items , please login</p>
+          <button
+            onClick={handleLogin}
+            className="bg-yellow-400 px-2 py-3 text-md mt-2 text-center text-black w-40 rounded-full font-semibold"
+          >
+            Login
+          </button>
         </div>
         <Footer />
       </div>

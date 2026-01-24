@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Link,useNavigate } from 'react-router-dom';
-import Footer from './components/Footer';
-import { db, auth } from '../firebase';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Footer from "./components/Footer";
+import { db, auth } from "../firebase";
 import {
   collection,
   getDocs,
   query,
   where,
   doc,
-  getDoc
-} from 'firebase/firestore';
-import { ArrowLeft } from 'lucide-react';
+  getDoc,
+} from "firebase/firestore";
+import { ArrowLeft } from "lucide-react";
 
 const Chats = () => {
   const [chats, setChats] = useState([]);
@@ -22,8 +22,11 @@ const Chats = () => {
 
     const fetchChats = async () => {
       try {
-        const chatsRef = collection(db, 'chats');
-        const q = query(chatsRef, where('users', 'array-contains', currentUser.uid));
+        const chatsRef = collection(db, "chats");
+        const q = query(
+          chatsRef,
+          where("users", "array-contains", currentUser.uid),
+        );
         const snapshot = await getDocs(q);
 
         const chatData = await Promise.all(
@@ -31,8 +34,10 @@ const Chats = () => {
             const chatId = docSnap.id;
             const data = docSnap.data();
 
-            const otherUserId = data.users.find((uid) => uid !== currentUser.uid);
-            const otherUserRef = doc(db, 'users', otherUserId);
+            const otherUserId = data.users.find(
+              (uid) => uid !== currentUser.uid,
+            );
+            const otherUserRef = doc(db, "users", otherUserId);
             const otherUserSnap = await getDoc(otherUserRef);
 
             const otherUsername = otherUserSnap.exists()
@@ -43,27 +48,58 @@ const Chats = () => {
               id: chatId,
               username: otherUsername,
             };
-          })
+          }),
         );
 
         setChats(chatData);
       } catch (error) {
-        console.error('Error fetching chats:', error);
+        console.error("Error fetching chats:", error);
       }
     };
 
     fetchChats();
   }, [currentUser]);
 
-  const handleBack = () =>{
-    navigate(-1)
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  const handleLogin = () => {
+    navigate("/login");
+  };
+
+  if (!chats) {
+    return (
+      <div className="flex flex-col min-h-screen bg-white p-3">
+        <div className="topbar flex mt-5">
+          <div className="backbutton mr-2" onClick={handleBack}>
+            <ArrowLeft />
+          </div>
+          <h1 className="text-xl font-bold text-yellow-600">
+            📨 Private Chats
+          </h1>
+        </div>
+        <div className="button flex flex-col items-center justify-center mt-10">
+          <p className="mt-2 text-lg text-gray-600">
+            To view chats , please login
+          </p>
+          <button
+            onClick={handleLogin}
+            className="bg-yellow-400 px-2 py-3 text-md mt-2 text-center text-black w-40 rounded-full font-semibold"
+          >
+            Login
+          </button>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-white p-3">
       <div className="topbar flex mt-5">
         <div className="backbutton mr-2" onClick={handleBack}>
-          <ArrowLeft/>
+          <ArrowLeft />
         </div>
         <h1 className="text-xl font-bold text-yellow-600">📨 Private Chats</h1>
       </div>
@@ -76,14 +112,20 @@ const Chats = () => {
           >
             <div className="flex justify-between">
               <div>
-                <div className="font-semibold text-gray-800">@{chat.username}</div>
-                <div className="text-sm text-gray-500 truncate">Tap to view chat</div>
+                <div className="font-semibold text-gray-800">
+                  @{chat.username}
+                </div>
+                <div className="text-sm text-gray-500 truncate">
+                  Tap to view chat
+                </div>
               </div>
             </div>
           </Link>
         ))}
         {chats.length === 0 && (
-          <div className="text-center text-sm text-gray-500 mt-20">No chats yet 👻</div>
+          <div className="text-center text-sm text-gray-500 mt-20">
+            No chats yet 👻
+          </div>
         )}
       </div>
       <Footer />

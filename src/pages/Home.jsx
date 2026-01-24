@@ -106,7 +106,7 @@ const Home = () => {
     }
   };
 
-  if (!locations || loading) {
+  if (loading) {
     return (
       <div className="loading">
         <div className="h-screen w-full relative">
@@ -146,8 +146,12 @@ const Home = () => {
       </div>
 
       <MapContainer
-        center={collegeData[collegeName].location}
-        zoom={15}
+        center={
+          collegeName
+            ? collegeData[collegeName].location
+            : ["20.5937", "78.9629"]
+        }
+        zoom={collegeName ? 15 : 5}
         scrollWheelZoom
         whenCreated={(map) => (mapRef.current = map)}
         style={{ height: "calc(100vh - 64px)", width: "100%" }}
@@ -157,7 +161,7 @@ const Home = () => {
           attribution="&copy; OpenStreetMap contributors"
         />
 
-        {locations.map((loc) => (
+        {locations?.map((loc) => (
           <Marker key={loc.id} position={loc.coordinates}>
             <Popup>
               <div className="text-sm font-semibold text-black mb-1">
