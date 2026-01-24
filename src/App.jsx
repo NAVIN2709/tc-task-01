@@ -12,10 +12,12 @@ import Items from "./pages/Items";
 import CollgeInvitePage from "./pages/CollegeInvite";
 import TermsAndConditions from "./pages/TermsAndConditionsPage"
 import PrivacyPolicies from "./pages/PrivacyPolicyPage"
+import InstallPromptModal from "./pages/components/InstallPromptModal";
 
 const App = () => {
   return (
     <BrowserRouter>
+    <InstallPromptModal />
       <Routes>
         {/* Public Route */}
         <Route path="/login" element={<Login />} />
