@@ -83,7 +83,7 @@ const InstallPromptModal = () => {
 
         <button
           onClick={handleInstall}
-          className="w-full bg-yellow-400 text-white py-3 rounded-full font-semibold mb-3"
+          className="w-full bg-yellow-400 text-black py-3 rounded-full font-semibold mb-3"
         >
           Install App
         </button>
