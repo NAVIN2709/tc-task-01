@@ -1,12 +1,22 @@
 import { useEffect, useState, useRef } from "react";
 
-const REOPEN_INTERVAL = 30 * 1000; 
+const REOPEN_INTERVAL = 20 * 1000;
+
+const getDismissedState = () => {
+  try {
+    return localStorage.getItem("installPromptDismissed") === "true";
+  } catch {
+    return false;
+  }
+};
 
 const InstallPromptModal = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [visible, setVisible] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(getDismissedState);
   const intervalRef = useRef(null);
 
+  /* ================= CAPTURE EVENT ================= */
   useEffect(() => {
     const handler = (e) => {
       e.preventDefault();
@@ -14,42 +24,47 @@ const InstallPromptModal = () => {
     };
 
     window.addEventListener("beforeinstallprompt", handler);
-
-    return () => {
-      window.removeEventListener("beforeinstallprompt", handler);
-    };
+    return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
+  /* ================= MODAL LOGIC ================= */
   useEffect(() => {
-    if (!deferredPrompt) return;
+    if (deferredPrompt) {
+      setVisible(true);
+      return;
+    }
 
-    if (window.matchMedia("(display-mode: standalone)").matches) return;
+    if (isDismissed) {
+      setVisible(true);
 
-    const showModal = () => setVisible(true);
+      intervalRef.current = setInterval(() => {
+        setVisible(true);
+      }, REOPEN_INTERVAL);
 
-    showModal();
+      return () => clearInterval(intervalRef.current);
+    }
+  }, [deferredPrompt, isDismissed]);
 
-    intervalRef.current = setInterval(() => {
-      showModal();
-    }, REOPEN_INTERVAL);
-
-    return () => clearInterval(intervalRef.current);
-  }, [deferredPrompt]);
-
+  /* ================= INSTALL ================= */
   const handleInstall = async () => {
-    if (!deferredPrompt) return;
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
 
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === "accepted") {
-      clearInterval(intervalRef.current);
+      if (outcome === "accepted") {
+        localStorage.setItem("installPromptDismissed", "true");
+        setIsDismissed(true);
+        clearInterval(intervalRef.current);
+      }
     }
 
     setVisible(false);
   };
 
+  /* ================= SKIP ================= */
   const handleSkip = () => {
+    localStorage.setItem("installPromptDismissed", "true");
+    setIsDismissed(true);
     setVisible(false);
   };
 
