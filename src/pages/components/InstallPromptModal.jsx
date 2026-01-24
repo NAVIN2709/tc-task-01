@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 
-const REOPEN_INTERVAL = 20 * 1000;
+const REOPEN_INTERVAL = 30 * 1000;
 
 const getDismissedState = () => {
   try {
@@ -71,7 +71,7 @@ const InstallPromptModal = () => {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+    <div className="fixed inset-0 z-[9990] bg-black/50 flex items-center justify-center">
       <div className="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-xl">
         <h2 className="text-xl font-extrabold mb-2">
           Install App 🚀
@@ -83,7 +83,7 @@ const InstallPromptModal = () => {
 
         <button
           onClick={handleInstall}
-          className="w-full bg-black text-white py-3 rounded-full font-semibold mb-3"
+          className="w-full bg-yellow-400 text-white py-3 rounded-full font-semibold mb-3"
         >
           Install App
         </button>
