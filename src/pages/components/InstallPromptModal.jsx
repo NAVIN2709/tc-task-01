@@ -52,7 +52,8 @@ const InstallPromptModal = () => {
       const { outcome } = await deferredPrompt.userChoice;
 
       if (outcome === "accepted") {
-        localStorage.setItem("installPromptDismissed", "true");
+        setVisible(false);
+        localStorage.setItem("installPromptDismissed", "false");
         setIsDismissed(true);
         clearInterval(intervalRef.current);
       }
