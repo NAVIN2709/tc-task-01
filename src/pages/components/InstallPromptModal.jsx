@@ -2,9 +2,9 @@ import { useEffect, useState, useRef } from "react";
 
 const REOPEN_INTERVAL = 30 * 1000;
 
-const getDismissedState = () => {
+const getInstallRejected = () => {
   try {
-    return localStorage.getItem("installPromptDismissed") === "true";
+    return localStorage.getItem("installRejected") === "true";
   } catch {
     return false;
   }
@@ -13,7 +13,7 @@ const getDismissedState = () => {
 const InstallPromptModal = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [visible, setVisible] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(getDismissedState);
+  const [installRejected, setInstallRejected] = useState(getInstallRejected);
   const intervalRef = useRef(null);
 
   /* ================= CAPTURE EVENT ================= */
@@ -21,6 +21,19 @@ const InstallPromptModal = () => {
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
+
+      // Automatically hide modal if browser prompt is acted on
+      e.userChoice.then(({ outcome }) => {
+        if (outcome === "accepted") {
+          localStorage.setItem("installRejected", "false");
+          setInstallRejected(false);
+        } else if (outcome === "dismissed") {
+          localStorage.setItem("installRejected", "true");
+          setInstallRejected(true);
+        }
+        setVisible(false);
+        clearInterval(intervalRef.current);
+      });
     };
 
     window.addEventListener("beforeinstallprompt", handler);
@@ -34,38 +47,29 @@ const InstallPromptModal = () => {
       return;
     }
 
-    if (isDismissed) {
+    if (installRejected) {
       setVisible(true);
 
       intervalRef.current = setInterval(() => {
         setVisible(true);
       }, REOPEN_INTERVAL);
-
-      return () => clearInterval(intervalRef.current);
     }
-  }, [deferredPrompt, isDismissed]);
+
+    return () => clearInterval(intervalRef.current);
+  }, [deferredPrompt, installRejected]);
 
   /* ================= INSTALL ================= */
   const handleInstall = async () => {
     if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-
-      if (outcome === "accepted") {
-        setVisible(false);
-        localStorage.setItem("installPromptDismissed", "false");
-        setIsDismissed(true);
-        clearInterval(intervalRef.current);
-      }
+      deferredPrompt.prompt(); // trigger browser prompt
+      // modal will close automatically when user acts on browser prompt
     }
-
-    setVisible(false);
   };
 
   /* ================= SKIP ================= */
   const handleSkip = () => {
-    localStorage.setItem("installPromptDismissed", "true");
-    setIsDismissed(true);
+    localStorage.setItem("installRejected", "true");
+    setInstallRejected(true);
     setVisible(false);
   };
 
@@ -74,9 +78,7 @@ const InstallPromptModal = () => {
   return (
     <div className="fixed inset-0 z-[9990] bg-black/50 flex items-center justify-center">
       <div className="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-xl">
-        <h2 className="text-xl font-extrabold mb-2">
-          Install App 🚀
-        </h2>
+        <h2 className="text-xl font-extrabold mb-2">Install App 🚀</h2>
 
         <p className="text-sm text-gray-600 mb-6">
           Get faster access, full-screen experience and notifications.
