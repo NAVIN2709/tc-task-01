@@ -31,14 +31,14 @@ const defaultIcon = L.icon({
 L.Marker.prototype.options.icon = defaultIcon;
 
 const Home = () => {
+  const user = auth.currentUser;
   const mapRef = useRef();
   const navigate = useNavigate();
 
   const [locations, setLocations] = useState([]);
   const [selectedType, setSelectedType] = useState("lost");
   const [loading, setLoading] = useState(false);
-
-  const collegeId = localStorage.getItem("collegeId");
+  const [collegeId,setCollegeId] = useState("")
 
   const collegeName =
     collegeId &&
@@ -71,6 +71,26 @@ const Home = () => {
 
     fetchItems();
   }, [selectedType]);
+
+    // Fetch user profile
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user) return;
+
+      const userRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(userRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        localStorage.setItem("collegeId", data.collegeId);
+        setCollegeId(data.collegeId);
+      }
+
+      setLoading(false);
+    };
+
+    fetchUserData();
+  }, [user]);
 
   const handleOpenCamera = () => {
     if (!auth.currentUser) {
