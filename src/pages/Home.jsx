@@ -20,8 +20,8 @@ import {
   setDoc,
   where,
 } from "firebase/firestore";
+import collegeData from "../data/collegeData.json";
 
-/* ================= Leaflet Marker Fix ================= */
 const defaultIcon = L.icon({
   iconUrl: markerIconUrl,
   shadowUrl: markerShadowUrl,
@@ -30,17 +30,23 @@ const defaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = defaultIcon;
 
-/* ================= Component ================= */
 const Home = () => {
   const mapRef = useRef();
   const navigate = useNavigate();
 
   const [locations, setLocations] = useState([]);
-  const [selectedType, setSelectedType] = useState("lost"); // 🔴 lost | 🟢 found
+  const [selectedType, setSelectedType] = useState("lost");
+  const [loading, setLoading] = useState(false);
 
-  /* ================= Fetch Items ================= */
+  const collegeId = localStorage.getItem("collegeId");
+
+  const collegeName =
+    collegeId &&
+    Object.keys(collegeData).find((key) => collegeData[key].id === collegeId);
+
   useEffect(() => {
     const fetchItems = async () => {
+      setLoading(true);
       try {
         const q = query(
           collection(db, "items"),
@@ -58,13 +64,14 @@ const Home = () => {
         setLocations(markers);
       } catch (error) {
         console.error("Error fetching items:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchItems();
   }, [selectedType]);
 
-  /* ================= Actions ================= */
   const handleOpenCamera = () => {
     if (!auth.currentUser) {
       navigate("/login");
@@ -99,7 +106,39 @@ const Home = () => {
     }
   };
 
-  /* ================= Render ================= */
+  if (!locations || loading) {
+    return (
+      <div className="loading">
+        <div className="h-screen w-full relative">
+          <div className="absolute top-4 left-12 bg-white px-4 py-2 rounded-full shadow-md text-sm font-semibold z-[1000]">
+            🗺️ Tap the camera icon to report an item
+          </div>
+
+          <div className="absolute top-15 left-20 bg-white rounded-full shadow-md flex overflow-hidden z-[1000]">
+            {["lost", "found"].map((type) => (
+              <button
+                key={type}
+                onClick={() => setSelectedType(type)}
+                className={`px-5 py-2 text-sm font-semibold transition-all
+              ${
+                selectedType === type
+                  ? "bg-black text-white"
+                  : "bg-white text-black hover:bg-gray-100"
+              }`}
+              >
+                {type === "lost" ? "🔴 Lost" : "🟢 Found"}
+              </button>
+            ))}
+          </div>
+          <div className="loader absolute top-[50%] flex items-center justify-center text-gray-500 text-xl w-full">
+            Loading Map...
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen w-full relative">
       <div className="absolute top-4 left-4 sm:top-10 sm:left-10 z-[6000]">
@@ -107,7 +146,7 @@ const Home = () => {
       </div>
 
       <MapContainer
-        center={[10.7602, 78.8142]}
+        center={collegeData[collegeName].location}
         zoom={15}
         scrollWheelZoom
         whenCreated={(map) => (mapRef.current = map)}
@@ -158,12 +197,10 @@ const Home = () => {
         ))}
       </MapContainer>
 
-      {/* ================= Info Notes ================= */}
       <div className="absolute top-4 left-12 bg-white px-4 py-2 rounded-full shadow-md text-sm font-semibold z-[1000]">
         🗺️ Tap the camera icon to report an item
       </div>
 
-      {/* ================= Lost / Found Tabs ================= */}
       <div className="absolute top-15 left-20 bg-white rounded-full shadow-md flex overflow-hidden z-[1000]">
         {["lost", "found"].map((type) => (
           <button
@@ -181,7 +218,6 @@ const Home = () => {
         ))}
       </div>
 
-      {/* ================= Floating Camera Button ================= */}
       <div
         onClick={handleOpenCamera}
         className="bg-yellow-400 rounded-full p-3 shadow-xl absolute bottom-20 left-1/2 transform -translate-x-1/2 z-[6000] cursor-pointer"

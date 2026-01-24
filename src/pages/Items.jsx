@@ -23,7 +23,6 @@ const Items = () => {
 
   const navigate = useNavigate();
 
-  /* ================= Fetch Items ================= */
   const fetchItems = async () => {
     setLoading(true);
     try {
@@ -47,7 +46,6 @@ const Items = () => {
     }
   };
 
-  /* ================= Chat ================= */
   const handleReport = async (otherUserId) => {
     if (!auth.currentUser) {
       console.log("User not authenticated, redirecting to login.");
@@ -79,12 +77,10 @@ const Items = () => {
     }
   };
 
-  /* ================= Effects ================= */
   useEffect(() => {
     fetchItems();
   }, [selectedType]);
 
-  /* ================= Search Filter ================= */
   const filteredItems = useMemo(() => {
     const text = search.toLowerCase().trim();
     if (!text) return items;
@@ -131,7 +127,6 @@ ${window.location.href}
     }
   };
 
-  /* ================= Loading ================= */
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col pb-24">
@@ -182,7 +177,6 @@ ${window.location.href}
 
   return (
     <div className="min-h-screen flex flex-col pb-24">
-      {/* ================= Sticky Header ================= */}
       <div className="sticky top-0 z-10 bg-yellow-100 border-b border-yellow-300 shadow-md">
         <div className="py-4 px-4">
           <h1 className="text-2xl font-bold text-yellow-600">
@@ -193,7 +187,6 @@ ${window.location.href}
           </p>
         </div>
 
-        {/* ================= Tabs ================= */}
         <div className="flex justify-center pb-3">
           <div className="bg-white rounded-full shadow-md flex overflow-hidden">
             {["lost", "found"].map((type) => (
@@ -213,7 +206,6 @@ ${window.location.href}
           </div>
         </div>
 
-        {/* ================= Search Bar ================= */}
         <div className="px-4 pb-4">
           <input
             type="text"
@@ -225,7 +217,6 @@ ${window.location.href}
         </div>
       </div>
 
-      {/* ================= Items List ================= */}
       <div className="p-4 max-w-2xl mx-auto flex-1 w-full">
         {filteredItems.length === 0 ? (
           <div className="text-gray-500 mt-10 text-center">
@@ -286,8 +277,6 @@ ${window.location.href}
           </div>
         )}
       </div>
-
-      {/* ================= Footer ================= */}
       <Footer />
     </div>
   );

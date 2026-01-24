@@ -79,8 +79,8 @@ const Profile = () => {
   }, [user]);
 
   const collegeName =
-    collegeId &&
-    Object.keys(collegeData).find((key) => collegeData[key] === collegeId);
+      collegeId &&
+      Object.keys(collegeData).find((key) => collegeData[key].id === collegeId);
 
   const inviteUrl = collegeName
     ? `${window.location.origin}/invite/${collegeName}`

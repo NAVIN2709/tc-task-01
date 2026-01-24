@@ -4,7 +4,7 @@ import { db, auth, messaging } from "../firebase";
 import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { getMessaging, getToken } from "firebase/messaging";
 import { useNavigate } from "react-router-dom";
-import collegeData from "../data/collegeData.json"
+import collegeData from "../data/collegeData.json";
 
 const profilePics = [
   "https://api.dicebear.com/7.x/bottts/svg?seed=Ghost1",
@@ -66,8 +66,9 @@ const Onboarding = () => {
   const [loading, setLoading] = useState(false);
   const [collegeId, setCollege] = useState("");
   const [collegeLocked, setCollegeLocked] = useState(false);
-  
-  /* ================= Check Existing User ================= */
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
   useEffect(() => {
     const savedCollegeId = localStorage.getItem("collegeId");
 
@@ -79,8 +80,7 @@ const Onboarding = () => {
     const user = auth.currentUser;
     if (!user) {
       navigate("/login");
-    } 
-    else {
+    } else {
       const userDocRef = doc(db, "users", user.uid);
       getDoc(userDocRef).then((snap) => {
         if (snap.exists() && snap.data().onboarding_completed) {
@@ -99,6 +99,17 @@ const Onboarding = () => {
       prev === 0 ? profilePics.length - 1 : prev - 1,
     );
   };
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener("beforeinstallprompt", handler);
+
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
 
   /* ================= SUBMIT ================= */
   const handleSubmit = async () => {
@@ -138,7 +149,11 @@ const Onboarding = () => {
       await saveFcmToken(user.uid);
 
       console.log("Onboarding completed");
-      navigate("/");
+      if (deferredPrompt) {
+        setShowInstallModal(true);
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       console.error("Onboarding error:", error);
       alert("Something went wrong. Please try again.");
@@ -146,8 +161,23 @@ const Onboarding = () => {
       setLoading(false);
     }
   };
+  const handleInstall = async () => {
+    if (!deferredPrompt) return;
 
-  /* ================= UI ================= */
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+    localStorage.setItem("installPromptDismissed", "true");
+
+    setDeferredPrompt(null);
+    setShowInstallModal(false);
+    navigate("/");
+  };
+
+  const handleSkipInstall = () => {
+    setShowInstallModal(false);
+    navigate("/");
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-yellow-400 px-6 py-10 text-center">
       <h1 className="text-3xl font-extrabold text-black mb-4">
@@ -196,12 +226,13 @@ const Onboarding = () => {
           Select your college 🎓
         </option>
 
-        {Object.entries(collegeData).map(([name, id]) => (
-          <option key={id} value={id}>
+        {Object.entries(collegeData).map(([name, data]) => (
+          <option key={data.id} value={data.id}>
             {name.toUpperCase()}
           </option>
         ))}
       </select>
+
       {collegeLocked && (
         <p className="text-sm text-black/70 mb-4">
           College is locked and cannot be changed 🎓
@@ -216,6 +247,30 @@ const Onboarding = () => {
       >
         {loading ? "Loading ..." : "Submit"}
       </button>
+      {showInstallModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-xl">
+            <h2 className="text-xl font-extrabold mb-2">Install App 🚀</h2>
+            <p className="text-sm text-gray-600 mb-6">
+              Get faster access, notifications, and a full-screen experience.
+            </p>
+
+            <button
+              onClick={handleInstall}
+              className="w-full bg-black text-white py-3 rounded-full font-semibold mb-3"
+            >
+              Install App
+            </button>
+
+            <button
+              onClick={handleSkipInstall}
+              className="w-full text-gray-600 py-2 text-sm"
+            >
+              Skip for now
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

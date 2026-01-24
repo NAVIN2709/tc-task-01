@@ -7,9 +7,9 @@ const CollegeInvitePage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const collegeId = collegeData[name.toLowerCase()];
-    if (collegeId) {
-      localStorage.setItem("collegeId", collegeId);
+    const college = collegeData[name?.toLowerCase()];
+    if (college?.id) {
+      localStorage.setItem("collegeId", college.id);
 
       const timer = setTimeout(() => {
         navigate("/login");
