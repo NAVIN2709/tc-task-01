@@ -353,7 +353,7 @@ const Profile = () => {
               <p>
                 📧 Email:{" "}
                 <a
-                  href="mailto:snavinnitt2006@gmail.com"
+                  href="mailto:navinnitt2006@gmail.com"
                   className="text-yellow-600 underline"
                 >
                   navinnitt2006@gmail.com
