@@ -87,6 +87,38 @@ app.post("/notify-new-item", async (req, res) => {
   }
 });
 
+// 🔔 Test notification to ONE token
+app.get("/test/:token", async (req, res) => {
+  try {
+    const token = req.params.token;
+
+    if (!token) {
+      return res.send("❌ Token missing");
+    }
+
+    const message = {
+      token: token, // 👈 SINGLE TOKEN
+      notification: {
+        title: "🧪 Test Notification",
+        body: "This was sent to only ONE device 🎯",
+      },
+      webpush: {
+        fcmOptions: {
+          link: "https://lostandfoundnitt.vercel.app",
+        },
+      },
+    };
+
+    const response = await admin.messaging().send(message);
+
+    res.send("✅ Notification sent to this token only");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("❌ Notification failed");
+  }
+});
+
+
 app.get("/ping",(req,res)=>{
     res.send("working")
 })
