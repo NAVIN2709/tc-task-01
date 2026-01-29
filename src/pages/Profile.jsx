@@ -4,7 +4,7 @@ import { Info, X } from "lucide-react";
 import Footer from "./components/Footer";
 import { signOut } from "firebase/auth";
 import { auth, db, messaging } from "../firebase";
-import { getToken } from "firebase/messaging";
+import { getToken, deleteToken } from "firebase/messaging";
 import {
   doc,
   getDoc,
@@ -34,10 +34,19 @@ const saveFcmToken = async (userId) => {
     const permission = await Notification.requestPermission();
     if (permission !== "granted") {
       console.log("Notification permission denied");
+      alert("Enable Notifications to get updates!");
       return;
     }
 
-    // 3️⃣ Get FCM Token
+    // 3️⃣ Delete old token (Force Refresh)
+    try {
+      await deleteToken(messaging);
+      console.log("Old FCM token deleted.");
+    } catch (err) {
+      console.warn("Failed to delete old token:", err);
+    }
+
+    // 4️⃣ Get New FCM Token
     const token = await getToken(messaging, {
       vapidKey:
         "BNd8QsYSe4Pmtqgs7o4E1nSaDycK_pQyC1lIgD3FvxQJCzbMqlbjE-tuucysFX1FDxJRQnthPnwi80GGr4gum_U",
@@ -46,7 +55,7 @@ const saveFcmToken = async (userId) => {
 
     if (!token) return;
 
-    // 4️⃣ Save token to Firestore
+    // 5️⃣ Save token to Firestore
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
       fcmToken: token,
