@@ -8,7 +8,7 @@ dotenv.config();
 const serviceAccount = {
   type: process.env.FIREBASE_TYPE,
   project_id: process.env.FIREBASE_PROJECT_ID,
-  private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+  private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
   client_email: process.env.FIREBASE_CLIENT_EMAIL,
   client_id: process.env.FIREBASE_CLIENT_ID,
 };
@@ -18,7 +18,7 @@ app.use(
   cors({
     origin: ["https://lostandfoundnitt.vercel.app"],
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json());
@@ -27,16 +27,16 @@ app.use(express.json());
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
-console.log("initialized")
+console.log("initialized");
 
 const db = admin.firestore();
 
 /* ================= Send Notification ================= */
 app.post("/notify-new-item", async (req, res) => {
-  console.log("pushing new notif")
+  console.log("pushing new notif");
   try {
     const { title, type } = req.body;
-      console.log(title,type)
+    console.log(title, type);
 
     if (!title || !type) {
       return res.status(400).json({ error: "Missing data" });
@@ -118,10 +118,56 @@ app.get("/test/:token", async (req, res) => {
   }
 });
 
+/* ================= Send Reminder to All ================= */
+app.get("/notify/all", async (req, res) => {
+  console.log("Sending reminder to all users");
 
-app.get("/ping",(req,res)=>{
-    res.send("working")
-})
+  try {
+    // 1️⃣ Get all users with notifications enabled
+    const usersSnap = await db
+      .collection("users")
+      .where("notificationsEnabled", "==", true)
+      .get();
+
+    const tokens = usersSnap.docs
+      .map((doc) => doc.data().fcmToken)
+      .filter(Boolean);
+
+    if (tokens.length === 0) {
+      return res.json({ message: "No tokens found" });
+    }
+
+    // 2️⃣ Reminder notification
+    const message = {
+      notification: {
+        title: "🔔 Lost & Found @ NITT",
+        body: "Found or lost something? Report it on the Lost & Found app to help others!",
+      },
+      webpush: {
+        fcmOptions: {
+          link: "https://lostandfoundnitt.vercel.app",
+        },
+      },
+      tokens,
+    };
+
+    // 3️⃣ Send push
+    const response = await admin.messaging().sendEachForMulticast(message);
+
+    res.json({
+      success: true,
+      sent: response.successCount,
+      failed: response.failureCount,
+    });
+  } catch (err) {
+    console.error("Reminder push error:", err);
+    res.status(500).json({ error: "Reminder notification failed" });
+  }
+});
+
+app.get("/ping", (req, res) => {
+  res.send("working");
+});
 
 /* ================= Server ================= */
 const PORT = process.env.PORT || 5000;
