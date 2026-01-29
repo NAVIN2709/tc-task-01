@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Share2, Bell } from "lucide-react";
+import { Share2, Bell, LoaderCircle } from "lucide-react";
 import { Info, X } from "lucide-react";
 import Footer from "./components/Footer";
 import { signOut } from "firebase/auth";
 import { auth, db, messaging } from "../firebase";
-import { getToken, deleteToken } from "firebase/messaging";
+import { getToken } from "firebase/messaging";
 import {
   doc,
   getDoc,
@@ -37,15 +37,7 @@ const saveFcmToken = async (userId) => {
       return;
     }
 
-    // 3️⃣ Delete old token (Force Refresh)
-    try {
-      await deleteToken(messaging);
-      console.log("Old FCM token deleted.");
-    } catch (err) {
-      console.warn("Failed to delete old token:", err);
-    }
-
-    // 4️⃣ Get New FCM Token
+    // 3️⃣ Get FCM Token
     const token = await getToken(messaging, {
       vapidKey:
         "BNd8QsYSe4Pmtqgs7o4E1nSaDycK_pQyC1lIgD3FvxQJCzbMqlbjE-tuucysFX1FDxJRQnthPnwi80GGr4gum_U",
@@ -54,7 +46,7 @@ const saveFcmToken = async (userId) => {
 
     if (!token) return;
 
-    // 5️⃣ Save token to Firestore
+    // 4️⃣ Save token to Firestore
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
       fcmToken: token,
@@ -79,6 +71,7 @@ const Profile = () => {
   const [showContactModal, setShowContactModal] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   const navigate = useNavigate();
   const user = auth.currentUser;
@@ -185,6 +178,7 @@ const Profile = () => {
 
   const confirmToggle = async () => {
     if (!user) return;
+    setConfirmLoading(true);
     try {
       if (notificationsEnabled) {
         // Disable
@@ -202,6 +196,7 @@ const Profile = () => {
     } catch (error) {
       console.error("Error updating notifications:", error);
     } finally {
+      setConfirmLoading(false);
       setShowNotificationModal(false);
     }
   };
@@ -505,15 +500,21 @@ const Profile = () => {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowNotificationModal(false)}
-                className="flex-1 py-2 text-gray-600 bg-gray-100 font-semibold rounded-lg hover:bg-gray-200"
+                disabled={confirmLoading}
+                className={`flex-1 py-2 text-gray-600 bg-gray-100 font-semibold rounded-lg hover:bg-gray-200 ${confirmLoading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 Cancel
               </button>
               <button
                 onClick={confirmToggle}
-                className={`flex-1 py-2 text-white font-semibold rounded-lg hover:opacity-90 ${notificationsEnabled ? "bg-red-500" : "bg-green-500"}`}
+                disabled={confirmLoading}
+                className={`flex-1 py-2 text-white font-semibold rounded-lg hover:opacity-90 flex items-center justify-center ${notificationsEnabled ? "bg-red-500" : "bg-green-500"} ${confirmLoading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                Confirm
+                {confirmLoading ? (
+                  <LoaderCircle className="w-5 h-5 animate-spin" />
+                ) : (
+                  "Confirm"
+                )}
               </button>
             </div>
           </div>
