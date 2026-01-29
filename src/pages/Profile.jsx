@@ -19,18 +19,14 @@ import {
 import { useNavigate } from "react-router-dom";
 import collegeData from "../data/collegeData.json";
 
-/* ================= FCM TOKEN SAVE ================= */
+import { getSWRegistration } from "../utils/swRegistration";
+
 const saveFcmToken = async (userId) => {
   try {
     if (!("Notification" in window)) return;
 
-    // 1️⃣ Register Service Worker
-    let registration;
-    if ("serviceWorker" in navigator) {
-      registration = await navigator.serviceWorker.register("/sw.js");
-    }
+    const registration = await getSWRegistration();
 
-    // 2️⃣ Request Notification Permission
     const permission = await Notification.requestPermission();
     if (permission !== "granted") {
       console.log("Notification permission denied");
@@ -38,7 +34,6 @@ const saveFcmToken = async (userId) => {
       return;
     }
 
-    // 3️⃣ Delete old token (Force Refresh)
     try {
       await deleteToken(messaging);
       console.log("Old FCM token deleted.");
@@ -46,7 +41,6 @@ const saveFcmToken = async (userId) => {
       console.warn("Failed to delete old token:", err);
     }
 
-    // 4️⃣ Get New FCM Token
     const token = await getToken(messaging, {
       vapidKey:
         "BNd8QsYSe4Pmtqgs7o4E1nSaDycK_pQyC1lIgD3FvxQJCzbMqlbjE-tuucysFX1FDxJRQnthPnwi80GGr4gum_U",
@@ -55,7 +49,6 @@ const saveFcmToken = async (userId) => {
 
     if (!token) return;
 
-    // 5️⃣ Save token to Firestore
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
       fcmToken: token,
@@ -190,16 +183,13 @@ const Profile = () => {
     setConfirmLoading(true);
     try {
       if (notificationsEnabled) {
-        // Disable
         const userRef = doc(db, "users", user.uid);
         await updateDoc(userRef, {
           notificationsEnabled: false,
         });
         setNotificationsEnabled(false);
       } else {
-        // Enable
         await saveFcmToken(user.uid);
-        // saveFcmToken updates firestore, so just update local state
         setNotificationsEnabled(true);
       }
     } catch (error) {
