@@ -13,6 +13,7 @@ import CollgeInvitePage from "./pages/CollegeInvite";
 import TermsAndConditions from "./pages/TermsAndConditionsPage"
 import PrivacyPolicies from "./pages/PrivacyPolicyPage"
 import InstallPromptModal from "./pages/components/InstallPromptModal";
+import OpenInBrowser from "./pages/OpenInBrowser";
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/invite/:name" element={<CollgeInvitePage />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/open" element={<OpenInBrowser />} />
         <Route path="/privacy-policies" element={<PrivacyPolicies />} />
         
 
