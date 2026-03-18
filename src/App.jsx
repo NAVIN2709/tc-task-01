@@ -10,15 +10,15 @@ import PrivateRoute from "./pages/components/PrivateRoute";
 import Onboarding from "./pages/Onboarding";
 import Items from "./pages/Items";
 import CollgeInvitePage from "./pages/CollegeInvite";
-import TermsAndConditions from "./pages/TermsAndConditionsPage"
-import PrivacyPolicies from "./pages/PrivacyPolicyPage"
+import TermsAndConditions from "./pages/TermsAndConditionsPage";
+import PrivacyPolicies from "./pages/PrivacyPolicyPage";
 import InstallPromptModal from "./pages/components/InstallPromptModal";
 import OpenInBrowser from "./pages/OpenInBrowser";
 
 const App = () => {
   return (
     <BrowserRouter>
-    <InstallPromptModal />
+      <InstallPromptModal />
       <Routes>
         {/* Public Route */}
         <Route path="/login" element={<Login />} />
@@ -27,7 +27,6 @@ const App = () => {
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
         <Route path="/open" element={<OpenInBrowser />} />
         <Route path="/privacy-policies" element={<PrivacyPolicies />} />
-        
 
         {/* Protected Routes */}
         <Route path="/" element={<Home />} />

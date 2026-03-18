@@ -1,47 +1,42 @@
-import React from 'react';
-import { MapPin, MessageSquare, TagIcon, User } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
-import { Tag } from 'lucide-react';
+import React from "react";
+import { MapPin, Tag, MessageSquare, User, Camera } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 const Footer = () => {
   const location = useLocation();
 
-  const isActive = (path) => location.pathname === path;
+  const navItems = [
+    { path: "/", label: "Map", Icon: MapPin },
+    { path: "/items", label: "Items", Icon: Tag },
+    { path: "/newplace", label: "New Place", Icon: Camera },
+    { path: "/chats", label: "Chats", Icon: MessageSquare },
+    { path: "/profile", label: "Profile", Icon: User },
+  ];
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-black text-white flex items-center justify-around h-16 shadow-lg z-150 border-t">
-      
-      {/* Map */}
-      <Link to="/" className="flex flex-col items-center text-xs">
-        <div className={`p-2 rounded-full ${isActive('/') ? 'bg-yellow-400' : ''}`}>
-          <MapPin size={24} />
-        </div>
-        <span className={`${isActive('/') ? 'text-yellow-500 font-semibold' : ''}`}>Map</span>
-      </Link>
+    <div className="fixed bottom-3 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] bg-black rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.4)] flex items-center justify-evenly px-1 py-1.5 z-[6000] border border-zinc-800">
+      {navItems.map(({ path, label, Icon }) => {
+        const isActive = location.pathname === path;
 
-      {/* Tags */}
-      <Link to="/items" className="flex flex-col items-center text-xs">
-        <div className={`p-2 rounded-full ${isActive('/items') ? 'bg-yellow-400' : ''}`}>
-          <TagIcon size={24} />
-        </div>
-        <span className={`${isActive('/items') ? 'text-yellow-500 font-semibold' : ''}`}>Items</span>
-      </Link>
-
-      {/* Chat */}
-      <Link to="/chats" className="flex flex-col items-center text-xs">
-        <div className={`p-2 rounded-full ${isActive('/chats') ? 'bg-yellow-400' : ''}`}>
-          <MessageSquare size={24} />
-        </div>
-        <span className={`${isActive('/chats') ? 'text-yellow-500 font-semibold' : ''}`}>Chats</span>
-      </Link>
-
-      {/* Profile */}
-      <Link to="/profile" className="flex flex-col items-center text-xs">
-        <div className={`p-2 rounded-full ${isActive('/profile') ? 'bg-yellow-400' : ''}`}>
-          <User size={24} />
-        </div>
-        <span className={`${isActive('/profile') ? 'text-yellow-500 font-semibold' : ''}`}>Profile</span>
-      </Link>
+        return (
+          <Link
+            key={path}
+            to={path}
+            className={`flex items-center justify-center gap-1.5 rounded-full transition-all duration-300 ${
+              isActive
+                ? "bg-yellow-400 text-black px-4 py-2"
+                : "text-zinc-400 hover:text-white p-2"
+            }`}
+          >
+            <Icon
+              size={24}
+              strokeWidth={isActive ? 2.5 : 2}
+              className={isActive ? "fill-white" : "fill-none"}
+            />
+            {isActive && <span className="font-semibold text-sm">{label}</span>}
+          </Link>
+        );
+      })}
     </div>
   );
 };

@@ -252,7 +252,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen pt-16 bg-white px-4">
+    <div className="flex flex-col items-center justify-start min-h-screen pt-16 pb-20 bg-white px-4">
       <button
         onClick={() => setShowContactModal(true)}
         className="

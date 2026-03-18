@@ -38,7 +38,7 @@ const Home = () => {
   const [locations, setLocations] = useState([]);
   const [selectedType, setSelectedType] = useState("lost");
   const [loading, setLoading] = useState(false);
-  const [collegeId,setCollegeId] = useState("")
+  const [collegeId, setCollegeId] = useState("");
 
   const collegeName =
     collegeId &&
@@ -72,7 +72,7 @@ const Home = () => {
     fetchItems();
   }, [selectedType]);
 
-    // Fetch user profile
+  // Fetch user profile
   useEffect(() => {
     const fetchUserData = async () => {
       if (!user) return;
@@ -129,7 +129,7 @@ const Home = () => {
   if (loading) {
     return (
       <div className="loading">
-        <div className="h-screen w-full relative">
+        <div className="h-[100dvh] w-full relative overflow-hidden">
           <div className="absolute top-4 left-12 bg-white px-4 py-2 rounded-full shadow-md text-sm font-semibold z-[1000]">
             🗺️ Tap the camera icon to report an item
           </div>
@@ -160,7 +160,7 @@ const Home = () => {
   }
 
   return (
-    <div className="h-screen w-full relative">
+    <div className="h-[100dvh] w-full relative overflow-hidden">
       <div className="absolute top-4 left-4 sm:top-10 sm:left-10 z-[6000]">
         <InstallAppButton />
       </div>
@@ -174,7 +174,7 @@ const Home = () => {
         zoom={collegeName ? 15 : 5}
         scrollWheelZoom
         whenCreated={(map) => (mapRef.current = map)}
-        style={{ height: "calc(100vh - 64px)", width: "100%" }}
+        style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -241,14 +241,6 @@ const Home = () => {
           </button>
         ))}
       </div>
-
-      <div
-        onClick={handleOpenCamera}
-        className="bg-yellow-400 rounded-full p-3 shadow-xl absolute bottom-20 left-1/2 transform -translate-x-1/2 z-[6000] cursor-pointer"
-      >
-        <Camera className="text-black" size={28} />
-      </div>
-
       <Footer />
     </div>
   );

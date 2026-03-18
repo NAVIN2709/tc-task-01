@@ -62,6 +62,11 @@ const Newplace = () => {
     { value: "Beryl Security", label: "Beryl Security" },
   ];
 
+  if (!auth.currentUser) {
+    navigate("/login");
+    return;
+  }
+
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -69,7 +74,7 @@ const Newplace = () => {
         setLocation({ lat: latitude, lng: longitude });
       },
       (err) => console.error("Location error:", err),
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true },
     );
   }, []);
 
@@ -231,7 +236,7 @@ const Newplace = () => {
               <Select
                 options={securityOptions}
                 value={securityOptions.find(
-                  (option) => option.value === form.submitted
+                  (option) => option.value === form.submitted,
                 )}
                 onChange={(selected) =>
                   setForm((prev) => ({ ...prev, submitted: selected.value }))

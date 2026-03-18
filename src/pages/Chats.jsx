@@ -96,7 +96,7 @@ const Chats = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white p-3">
+    <div className="flex flex-col min-h-screen bg-white p-3 pb-20">
       <div className="topbar flex mt-5">
         <div className="backbutton mr-2" onClick={handleBack}>
           <ArrowLeft />
