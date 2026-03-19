@@ -14,6 +14,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import Footer from "../pages/components/Footer";
 import { Share2 } from "lucide-react";
+import TypeTabs from "./components/TypeTabs";
 
 const Items = () => {
   const [items, setItems] = useState([]);
@@ -143,22 +144,7 @@ ${window.location.href}
             </p>
           </div>
           <div className="flex justify-center pb-3">
-            <div className="bg-white rounded-full shadow-md flex overflow-hidden">
-              {["lost", "found"].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
-                  className={`px-6 py-2 text-sm font-semibold transition-all
-                  ${
-                    selectedType === type
-                      ? "bg-black text-white"
-                      : "bg-white text-black hover:bg-gray-100"
-                  }`}
-                >
-                  {type === "lost" ? "🔴 Lost" : "🟢 Found"}
-                </button>
-              ))}
-            </div>
+            <TypeTabs selectedType={selectedType} setSelectedType={setSelectedType} />
           </div>
           <div className="px-4 pb-4">
             <input
@@ -220,22 +206,7 @@ ${window.location.href}
         </div>
 
         <div className="flex justify-center pb-3">
-          <div className="bg-white rounded-full shadow-md flex overflow-hidden">
-            {["lost", "found"].map((type) => (
-              <button
-                key={type}
-                onClick={() => setSelectedType(type)}
-                className={`px-6 py-2 text-sm font-semibold transition-all
-                  ${
-                    selectedType === type
-                      ? "bg-black text-white"
-                      : "bg-white text-black hover:bg-gray-100"
-                  }`}
-              >
-                {type === "lost" ? "🔴 Lost" : "🟢 Found"}
-              </button>
-            ))}
-          </div>
+          <TypeTabs selectedType={selectedType} setSelectedType={setSelectedType} />
         </div>
 
         <div className="px-4 pb-4">

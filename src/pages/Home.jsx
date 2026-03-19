@@ -8,6 +8,7 @@ import { Camera } from "lucide-react";
 import InstallAppButton from "./components/InstallButton";
 import { useNavigate } from "react-router-dom";
 import Footer from "./components/Footer";
+import TypeTabs from "./components/TypeTabs";
 import { db, auth } from "../firebase";
 import {
   collection,
@@ -134,22 +135,11 @@ const Home = () => {
             🗺️ Tap the camera icon to report an item
           </div>
 
-          <div className="absolute top-15 left-20 bg-white rounded-full shadow-md flex overflow-hidden z-[1000]">
-            {["lost", "found"].map((type) => (
-              <button
-                key={type}
-                onClick={() => setSelectedType(type)}
-                className={`px-5 py-2 text-sm font-semibold transition-all
-              ${
-                selectedType === type
-                  ? "bg-black text-white"
-                  : "bg-white text-black hover:bg-gray-100"
-              }`}
-              >
-                {type === "lost" ? "🔴 Lost" : "🟢 Found"}
-              </button>
-            ))}
-          </div>
+          <TypeTabs
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
+            className="absolute top-15 left-20 z-[1000]"
+          />
           <div className="loader absolute top-[50%] flex items-center justify-center text-gray-500 text-xl w-full">
             Loading Map...
           </div>
@@ -225,22 +215,11 @@ const Home = () => {
         🗺️ Tap the camera icon to report an item
       </div>
 
-      <div className="absolute top-15 left-20 bg-white rounded-full shadow-md flex overflow-hidden z-[1000]">
-        {["lost", "found"].map((type) => (
-          <button
-            key={type}
-            onClick={() => setSelectedType(type)}
-            className={`px-5 py-2 text-sm font-semibold transition-all
-              ${
-                selectedType === type
-                  ? "bg-black text-white"
-                  : "bg-white text-black hover:bg-gray-100"
-              }`}
-          >
-            {type === "lost" ? "🔴 Lost" : "🟢 Found"}
-          </button>
-        ))}
-      </div>
+      <TypeTabs
+        selectedType={selectedType}
+        setSelectedType={setSelectedType}
+        className="absolute top-15 left-20 z-[1000]"
+      />
       <Footer />
     </div>
   );
