@@ -7,13 +7,40 @@ import { auth, db } from "../../firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import Select from "react-select";
 
+export const UploadPicture = async (base64Image) => {
+  const uploadPreset = "lostaf";
+
+  const formData = new FormData();
+  formData.append("file", base64Image);
+  formData.append("upload_preset", uploadPreset);
+
+  try {
+    const res = await fetch(import.meta.env.VITE_CLOUDINARY_UPLOAD_URL, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error("Cloudinary upload failed:", errorData);
+      throw new Error(`Cloudinary upload failed with status ${res.status}`);
+    }
+
+    const data = await res.json();
+    return data.secure_url;
+  } catch (error) {
+    console.error("Error in UploadPicture:", error);
+    throw error;
+  }
+};
+
 const Newplace = () => {
   const [image, setImage] = useState("");
   const [location, setLocation] = useState(null);
   const [form, setForm] = useState({
     title: "",
     description: "",
-    type: "found", // 'lost' or 'found'
+    type: "found",
     submitted: "",
   });
   const [facingMode, setFacingMode] = useState("environment");
@@ -114,11 +141,16 @@ const Newplace = () => {
 
     try {
       const currentUser = auth.currentUser;
+      const imageUrl = await UploadPicture(image);
+
+      if (!imageUrl) {
+        throw new Error("Cloudinary returned no secure_url");
+      }
 
       const newItem = {
         title: form.title,
         description: form.description,
-        image,
+        image: imageUrl,
         coordinates: [location.lat, location.lng],
         submitted_by: currentUser.uid,
         submitted_to: form.type === "found" ? form.submitted : null,
@@ -127,7 +159,6 @@ const Newplace = () => {
       };
 
       await addDoc(collection(db, "items"), newItem);
-      // 🔔 Trigger push notification
       await fetch(import.meta.env.VITE_BACKEND_URL, {
         method: "POST",
         headers: {
@@ -139,7 +170,6 @@ const Newplace = () => {
         }),
       });
 
-      console.log("Item posted & notification sent");
       navigate("/");
     } catch (error) {
       console.error("Failed to submit item:", error);

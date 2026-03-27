@@ -6,10 +6,10 @@ import { useNavigate } from "react-router-dom";
 import logo from "/logo.png";
 
 // Slide images
-import slide1Img from "/slide1.png";
-import slide2Img from "/slide2.png";
-import slide3Img from "/slide3.png";
-import slide4Img from "/slide4.png";
+import slide1Img from "/slide1.webp";
+import slide2Img from "/slide2.webp";
+import slide3Img from "/slide3.webp";
+import slide4Img from "/slide4.webp";
 
 const slides = [
   {
